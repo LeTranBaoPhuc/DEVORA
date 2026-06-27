@@ -1,0 +1,127 @@
+.hero {
+  padding-top: 4rem;
+  padding-bottom: 4rem;
+  position: relative;
+}
+
+.hero-container {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.hero-content {
+  flex: 1;
+  max-width: 32rem;
+}
+
+.hero-title {
+  font-family: var(--font-heading);
+  font-weight: 900;
+  font-size: 2.5rem;
+  line-height: 1.1;
+  color: var(--foreground);
+  margin-bottom: 1.5rem;
+  letter-spacing: -0.02em;
+}
+
+@media (min-width: 768px) {
+  .hero-title {
+    font-size: 3rem;
+  }
+}
+
+.hero-description {
+  font-size: 0.875rem;
+  color: rgba(0, 34, 32, 0.7);
+  margin-bottom: 2rem;
+}
+
+.btn-join {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  height: 2.5rem;
+  padding: 0 1.5rem;
+  font-size: 0.875rem;
+  font-weight: bold;
+  background-color: #fff;
+  color: var(--primary);
+  border-radius: 9999px;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s;
+}
+
+.btn-join:hover {
+  transform: translateY(-2px);
+}
+
+.hero-visual {
+  flex: 1;
+  position: relative;
+  display: none;
+  justify-content: flex-end;
+}
+
+@media (min-width: 768px) {
+  .hero-visual {
+    display: flex;
+  }
+}
+
+.visual-bg-blocks {
+  position: absolute;
+  right: 0;
+  top: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+
+.bg-block {
+  position: absolute;
+  background-color: rgba(18, 111, 99, 0.5); /* Semi-transparent teal */
+  backdrop-filter: blur(4px);
+}
+
+.top-left {
+  top: -2rem;
+  left: 4rem;
+  width: 6rem;
+  height: 6rem;
+}
+
+.bottom-right {
+  bottom: 0;
+  right: -2rem;
+  width: 8rem;
+  height: 8rem;
+}
+
+.visual-cards {
+  position: relative;
+  z-index: 10;
+  width: 24rem;
+  height: 28rem;
+  background-color: #e5e5e5;
+  border-radius: 1rem;
+  box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+  padding: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.card-placeholder {
+  background-color: #9ca3af;
+  border-radius: 0.75rem;
+  width: 100%;
+}
+
+.card-main {
+  height: 10rem;
+}
+
+.card-sub {
+  height: 8rem;
+}
