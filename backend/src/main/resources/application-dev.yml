@@ -69,7 +69,7 @@ logging:
 
 app:
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173}
+    allowed-origins: ${CORS_ALLOWED_ORIGINS:http://localhost:5173,http://localhost:3000}
   websocket:
     allowed-origin-patterns: ${WS_ALLOWED_ORIGIN_PATTERNS:http://localhost:5173}
 

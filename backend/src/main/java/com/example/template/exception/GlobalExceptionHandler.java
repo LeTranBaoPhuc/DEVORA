@@ -103,6 +103,14 @@ public class GlobalExceptionHandler {
     }
 
     @ResponseStatus(UNAUTHORIZED)
+    @ExceptionHandler(org.springframework.security.authentication.DisabledException.class)
+    public ErrorResponse handleDisabledException(Exception e, WebRequest request) {
+        return buildErrorResponse(UNAUTHORIZED, request,
+                UNAUTHORIZED.getReasonPhrase().toUpperCase(),
+                messageService.getMessage("auth.account_disabled"));
+    }
+
+    @ResponseStatus(UNAUTHORIZED)
     @ExceptionHandler(JwtAuthenticationException.class)
     public ErrorResponse handleJwtAuthenticationException(JwtAuthenticationException e, WebRequest request) {
         return buildErrorResponse(UNAUTHORIZED, request,

@@ -8,8 +8,8 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
-import { useLanguage } from "@/components/language-provider";
-import { useAuth } from "@/components/auth-provider";
+import { useLanguage } from "@/contexts/language.context";
+import { useAuth } from "@/hooks/useAuth";
 import {
   DropdownMenu,
   DropdownMenuContent,

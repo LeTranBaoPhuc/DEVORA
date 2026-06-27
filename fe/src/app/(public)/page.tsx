@@ -6,7 +6,7 @@ import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/marketplace/product-card";
 import { SellerCard } from "@/components/marketplace/seller-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { useLanguage } from "@/components/language-provider";
+import { useLanguage } from "@/contexts/language.context";
 
 const CATEGORIES = [
   { name: "AI Agents", icon: Bot, count: "1.2k" },

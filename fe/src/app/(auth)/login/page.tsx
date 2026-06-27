@@ -5,7 +5,8 @@ import { Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
-import { useAuth } from "@/components/auth-provider";
+import { useAuth } from "@/hooks/useAuth";
+import { ROUTES } from "@/routes";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
@@ -16,25 +17,32 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    setErrorMessage("");
     if (!email || !password) {
-      toast.error("Please enter email and password");
+      setErrorMessage("Please enter email and password");
       return;
     }
     
     setIsSubmitting(true);
-    const success = await login(email, password);
-    setIsSubmitting(false);
-    
-    if (success) {
-      toast.success("Welcome back!");
-      router.push("/");
-    } else {
-      toast.error("Login failed");
+    try {
+      const success = await login(email, password);
+      if (success) {
+        toast.success("Welcome back!");
+        router.push(ROUTES.HOME);
+      } else {
+        setErrorMessage("Login failed. Please check your credentials.");
+      }
+    } catch (err: any) {
+      setErrorMessage(err.message || "An unexpected error occurred during login.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
+
   return (
     <>
       <div className="mb-8 text-center sm:text-left">
@@ -70,6 +78,11 @@ export default function LoginPage() {
       </div>
 
       <form className="space-y-5" onSubmit={handleSubmit}>
+        {errorMessage && (
+          <div className="p-3 text-sm text-destructive-foreground bg-destructive/90 rounded-md">
+            {errorMessage}
+          </div>
+        )}
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">Email</label>
           <Input type="email" placeholder="m@example.com" value={email} onChange={e => setEmail(e.target.value)} className="h-12 bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" required />
