@@ -1,0 +1,322 @@
+"use client";
+
+import { useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Star, Download, Heart, ShieldCheck, Share2, Check, ExternalLink } from "lucide-react";
+import { Button } from "@/components/ui/button";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Separator } from "@/components/ui/separator";
+import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
+import { ProductCard } from "@/components/marketplace/product-card";
+
+const PRODUCT = {
+  id: "1",
+  slug: "ecommerce-mobile-app",
+  title: "E-commerce Mobile App Full Source Code",
+  description: "A complete, production-ready e-commerce mobile application built with React Native, Firebase, and Stripe. Includes user authentication, product catalog, shopping cart, secure checkout, and order history. Beautiful UI designed for conversion.",
+  version: "2.1.4",
+  lastUpdated: "Oct 24, 2025",
+  compatiblePlatforms: ["iOS", "Android", "Web"],
+  images: [
+    "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&q=80&w=1200",
+    "https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?auto=format&fit=crop&q=80&w=1200",
+    "https://images.unsplash.com/photo-1523206489230-c012c64b2b48?auto=format&fit=crop&q=80&w=1200"
+  ],
+  price: 299.00,
+  originalPrice: 499.00,
+  rating: 4.9,
+  reviewCount: 128,
+  salesCount: 342,
+  productType: "Mobile App",
+  licenseType: "Single Use",
+  techStack: ["React Native", "Firebase", "Stripe", "Redux"],
+  aiToolsUsed: ["Figma to Code", "GitHub Copilot"],
+  aiVerified: true,
+  aiQualityScore: 96,
+  seller: { 
+    username: "AppMaster", 
+    avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d", 
+    isVerified: true,
+    rating: 4.9,
+    memberSince: "Jan 2024"
+  }
+};
+
+const RELATED_PRODUCTS = [
+  {
+    id: "2", slug: "saas-dashboard-nextjs", title: "Modern SaaS Dashboard", coverImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600", price: 149.99, rating: 4.7, salesCount: 1205, productType: "Web App", techStack: ["Next.js"], seller: { username: "WebNinja", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704e", isVerified: false }
+  },
+  {
+    id: "3", slug: "social-media-management", title: "Social Media Platform", coverImage: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=600", price: 499.00, rating: 4.8, salesCount: 89, productType: "Web App", techStack: ["MERN Stack"], seller: { username: "CodeCrafter", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704f", isVerified: true }
+  },
+  {
+    id: "4", slug: "fitness-tracking-app", title: "Fitness Tracking App", coverImage: "https://images.unsplash.com/photo-1526506114642-990520a2e053?auto=format&fit=crop&q=80&w=600", price: 199.00, rating: 4.6, salesCount: 2341, productType: "Mobile App", techStack: ["Flutter"], seller: { username: "FitDevs", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704g", isVerified: true }
+  },
+  {
+    id: "5", slug: "real-estate-portal", title: "Real Estate Portal", coverImage: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=600", price: 345.00, rating: 4.9, salesCount: 672, productType: "Web App", techStack: ["Vue.js"], seller: { username: "PropertyTech", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704h", isVerified: false }
+  }
+];
+
+export default function ProductDetailPage() {
+  const [activeImage, setActiveImage] = useState(0);
+  const [isWishlisted, setIsWishlisted] = useState(false);
+  const router = useRouter();
+
+  const handleBuyNow = () => {
+    toast.success("Redirecting to checkout...");
+    setTimeout(() => {
+      router.push("/dashboard/orders/ORD-9482");
+    }, 1000);
+  };
+
+  const handleChat = () => {
+    router.push("/messages?seller=" + PRODUCT.seller.username);
+  };
+
+  const handleWishlist = () => {
+    setIsWishlisted(!isWishlisted);
+    toast.success(isWishlisted ? "Removed from wishlist" : "Added to wishlist");
+  };
+
+  const handleShare = () => {
+    navigator.clipboard.writeText(window.location.href);
+    toast.success("Link copied to clipboard!");
+  };
+
+  return (
+    <div className="container mx-auto px-4 py-8">
+      {/* Breadcrumb */}
+      <div className="mb-6">
+        <Breadcrumb>
+          <BreadcrumbList>
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/">Home</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href="/marketplace">Marketplace</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbLink href={`/marketplace?category=ai-agents`}>AI Agents</BreadcrumbLink>
+            </BreadcrumbItem>
+            <BreadcrumbSeparator />
+            <BreadcrumbItem>
+              <BreadcrumbPage>{PRODUCT.title}</BreadcrumbPage>
+            </BreadcrumbItem>
+          </BreadcrumbList>
+        </Breadcrumb>
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
+        {/* Left Column: Image Gallery */}
+        <div className="lg:col-span-2 space-y-4">
+          <div className="aspect-[16/9] bg-secondary rounded-xl overflow-hidden border border-border relative">
+            <img src={PRODUCT.images[activeImage]} alt={PRODUCT.title} className="w-full h-full object-cover" />
+            <Badge className="absolute top-4 left-4 bg-background/80 backdrop-blur text-foreground border-none">
+              {PRODUCT.productType}
+            </Badge>
+          </div>
+          <div className="grid grid-cols-5 gap-3">
+            {PRODUCT.images.map((img, i) => (
+              <div 
+                key={i} 
+                className={`aspect-video rounded-lg overflow-hidden border-2 cursor-pointer transition-colors ${activeImage === i ? 'border-primary' : 'border-border hover:border-border-hover'}`}
+                onClick={() => setActiveImage(i)}
+              >
+                <img src={img} alt="" className="w-full h-full object-cover" />
+              </div>
+            ))}
+          </div>
+
+          {/* Details Tabs */}
+          <div className="mt-12">
+            <Tabs defaultValue="overview">
+              <TabsList className="w-full justify-start border-b border-border rounded-none bg-transparent p-0 h-auto">
+                <TabsTrigger value="overview" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-6 py-3 font-medium">Overview</TabsTrigger>
+                <TabsTrigger value="demo" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-6 py-3 font-medium">Demo</TabsTrigger>
+                <TabsTrigger value="docs" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-6 py-3 font-medium">Documentation</TabsTrigger>
+                <TabsTrigger value="reviews" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-6 py-3 font-medium">Reviews ({PRODUCT.reviewCount})</TabsTrigger>
+                <TabsTrigger value="qa" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-6 py-3 font-medium">Q&A</TabsTrigger>
+              </TabsList>
+              
+              <TabsContent value="overview" className="pt-6 space-y-8">
+                <div>
+                  <h3 className="text-xl font-heading font-semibold mb-4">About this Product</h3>
+                  <p className="text-muted-foreground leading-relaxed">{PRODUCT.description}</p>
+                </div>
+
+                <div className="grid sm:grid-cols-2 gap-6">
+                  <div>
+                    <h4 className="font-medium mb-3 text-sm uppercase tracking-wider text-muted-foreground">Tech Stack</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {PRODUCT.techStack.map(t => <Badge key={t} variant="secondary" className="font-normal">{t}</Badge>)}
+                    </div>
+                  </div>
+                  <div>
+                    <h4 className="font-medium mb-3 text-sm uppercase tracking-wider text-muted-foreground">Tools & Libraries</h4>
+                    <div className="flex flex-wrap gap-2">
+                      {PRODUCT.aiToolsUsed.map(t => <Badge key={t} variant="outline" className="font-normal border-border">{t}</Badge>)}
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h4 className="font-medium mb-3 text-sm uppercase tracking-wider text-muted-foreground">Compatible Platforms</h4>
+                  <ul className="grid grid-cols-2 gap-2 text-sm text-foreground">
+                    {PRODUCT.compatiblePlatforms.map(platform => (
+                      <li key={platform} className="flex items-center gap-2">
+                        <Check className="w-4 h-4 text-success" /> {platform}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </TabsContent>
+              <TabsContent value="demo" className="pt-6 space-y-8">
+                <div>
+                  <h3 className="text-xl font-heading font-semibold mb-4">Product Demo</h3>
+                  <div 
+                    onClick={() => toast.info("Video demo is not available in this preview.")}
+                    className="aspect-video bg-black/5 rounded-xl overflow-hidden flex flex-col items-center justify-center border border-border text-muted-foreground relative group cursor-pointer hover:bg-black/10 transition-colors"
+                  >
+                    <div className="w-16 h-16 rounded-full bg-primary/90 flex items-center justify-center mb-4 group-hover:scale-110 transition-transform">
+                      <div className="w-0 h-0 border-t-[10px] border-t-transparent border-l-[16px] border-l-primary-foreground border-b-[10px] border-b-transparent ml-1"></div>
+                    </div>
+                    <span>Watch Video Demo</span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    {PRODUCT.images.map((img, i) => (
+                      <div 
+                        key={i} 
+                        onClick={() => {
+                          setActiveImage(i);
+                          window.scrollTo({ top: 0, behavior: 'smooth' });
+                          toast.success(`Switched to image ${i + 1}`);
+                        }}
+                        className="aspect-video rounded-lg overflow-hidden border border-border hover:border-primary transition-colors cursor-pointer"
+                      >
+                        <img src={img} alt="" className="w-full h-full object-cover" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </TabsContent>
+              <TabsContent value="docs" className="pt-6">
+                <p className="text-muted-foreground">Documentation content goes here...</p>
+              </TabsContent>
+              <TabsContent value="reviews" className="pt-6">
+                <p className="text-muted-foreground">Reviews content goes here...</p>
+              </TabsContent>
+              <TabsContent value="qa" className="pt-6">
+                <p className="text-muted-foreground">Q&A content goes here...</p>
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
+
+        {/* Right Column: Checkout & Info */}
+        <div className="space-y-6">
+          <div className="p-6 rounded-xl border border-border bg-card sticky top-24">
+            <div className="mb-2 flex flex-wrap gap-2">
+              {PRODUCT.aiVerified && (
+                <Badge variant="default" className="bg-primary/20 text-primary border-none flex items-center gap-1.5">
+                  <ShieldCheck className="w-3.5 h-3.5" /> AI Verified (Score: {PRODUCT.aiQualityScore}/100)
+                </Badge>
+              )}
+              <Badge variant="outline" className="border-border text-muted-foreground">
+                {PRODUCT.licenseType}
+              </Badge>
+            </div>
+
+            <h1 className="text-2xl font-heading font-bold mb-4">{PRODUCT.title}</h1>
+            
+            <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6 pb-6 border-b border-border">
+              <div className="flex items-center gap-1.5">
+                <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
+                <span className="font-medium text-foreground">{PRODUCT.rating.toFixed(1)}</span>
+                <span>({PRODUCT.reviewCount})</span>
+              </div>
+              <div className="w-1 h-1 rounded-full bg-border"></div>
+              <div className="flex items-center gap-1.5">
+                <Download className="w-4 h-4" />
+                <span className="text-foreground">{PRODUCT.salesCount}</span> Sales
+              </div>
+            </div>
+
+            <div className="mb-6">
+              <div className="flex items-end gap-3 mb-2">
+                <span className="text-4xl font-mono font-bold text-primary">${PRODUCT.price.toFixed(2)}</span>
+                {PRODUCT.originalPrice && (
+                  <span className="text-lg font-mono text-muted-foreground line-through">${PRODUCT.originalPrice.toFixed(2)}</span>
+                )}
+              </div>
+              <p className="text-xs text-muted-foreground">Includes 6 months of support and updates.</p>
+            </div>
+
+            <div className="space-y-3">
+              <Button onClick={handleBuyNow} size="lg" className="w-full text-primary-foreground font-semibold h-12 text-base">
+                Buy Now
+              </Button>
+              <Button onClick={handleChat} variant="outline" size="lg" className="w-full font-semibold h-12 text-base border border-border hover:border-primary hover:text-primary transition-colors text-foreground bg-transparent">
+                Chat to Customize
+              </Button>
+              <div className="flex gap-3">
+                <Button onClick={handleWishlist} variant="outline" className={`flex-1 h-12 bg-transparent border-border hover:border-border-hover ${isWishlisted ? 'text-danger border-danger/50 hover:border-danger' : ''}`}>
+                  <Heart className={`w-4 h-4 mr-2 ${isWishlisted ? 'fill-danger text-danger' : ''}`} /> 
+                  {isWishlisted ? 'Wishlisted' : 'Add to Wishlist'}
+                </Button>
+                <Button onClick={handleShare} variant="outline" size="icon" className="h-12 w-12 shrink-0 bg-transparent border-border hover:border-border-hover">
+                  <Share2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </div>
+
+            <div className="mt-6 pt-6 border-t border-border">
+              <Link href={`/profile/${PRODUCT.seller.username}`}>
+                <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors">
+                  <Avatar className="w-12 h-12 border border-border">
+                    <AvatarImage src={PRODUCT.seller.avatar} />
+                    <AvatarFallback>{PRODUCT.seller.username.slice(0, 2)}</AvatarFallback>
+                  </Avatar>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-semibold text-foreground truncate">{PRODUCT.seller.username}</span>
+                      {PRODUCT.seller.isVerified && <ShieldCheck className="w-4 h-4 text-success shrink-0" />}
+                    </div>
+                    <div className="text-xs text-muted-foreground mt-0.5">Member since {PRODUCT.seller.memberSince}</div>
+                  </div>
+                  <ExternalLink className="w-4 h-4 text-muted-foreground" />
+                </div>
+              </Link>
+            </div>
+
+            <div className="mt-6 space-y-2 text-sm">
+              <div className="flex justify-between text-muted-foreground">
+                <span>Version</span>
+                <span className="text-foreground font-mono">{PRODUCT.version}</span>
+              </div>
+              <div className="flex justify-between text-muted-foreground">
+                <span>Last Updated</span>
+                <span className="text-foreground">{PRODUCT.lastUpdated}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Related Products */}
+      <div className="mt-24 pt-12 border-t border-border">
+        <h2 className="text-2xl font-heading font-bold mb-8">You might also like</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+          {RELATED_PRODUCTS.map((product) => (
+            <ProductCard key={product.id} {...product} />
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
