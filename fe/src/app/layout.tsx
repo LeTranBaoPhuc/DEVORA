@@ -4,6 +4,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { Toaster } from "@/components/ui/sonner";
 import { ThemeProvider } from "@/components/theme-provider";
 import { LanguageProvider } from "@/components/language-provider";
+import { AuthProvider } from "@/components/auth-provider";
 import "./globals.css";
 
 const fontHeading = Funnel_Sans({
@@ -44,17 +45,19 @@ export default function RootLayout({
       className={`${fontHeading.variable} ${fontSans.variable} ${fontCaption.variable} ${fontMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col">
-        <LanguageProvider>
-          <ThemeProvider
-            attribute="class"
-            defaultTheme="dark"
-            enableSystem={false}
-            disableTransitionOnChange
-          >
-            <TooltipProvider>{children}</TooltipProvider>
-            <Toaster />
-          </ThemeProvider>
-        </LanguageProvider>
+        <AuthProvider>
+          <LanguageProvider>
+            <ThemeProvider
+              attribute="class"
+              defaultTheme="dark"
+              enableSystem={false}
+              disableTransitionOnChange
+            >
+              <TooltipProvider>{children}</TooltipProvider>
+              <Toaster />
+            </ThemeProvider>
+          </LanguageProvider>
+        </AuthProvider>
       </body>
     </html>
   );
