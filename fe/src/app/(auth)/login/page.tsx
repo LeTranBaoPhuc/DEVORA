@@ -5,8 +5,36 @@ import { Mail } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Separator } from "@/components/ui/separator";
+import { useAuth } from "@/components/auth-provider";
+import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 
 export default function LoginPage() {
+  const { login } = useAuth();
+  const router = useRouter();
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email || !password) {
+      toast.error("Please enter email and password");
+      return;
+    }
+    
+    setIsSubmitting(true);
+    const success = await login(email, password);
+    setIsSubmitting(false);
+    
+    if (success) {
+      toast.success("Welcome back!");
+      router.push("/");
+    } else {
+      toast.error("Login failed");
+    }
+  };
   return (
     <>
       <div className="mb-8 text-center sm:text-left">
@@ -41,21 +69,23 @@ export default function LoginPage() {
         </div>
       </div>
 
-      <form className="space-y-5">
+      <form className="space-y-5" onSubmit={handleSubmit}>
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">Email</label>
-          <Input type="email" placeholder="m@example.com" className="h-12 bg-card border-border" />
+          <Input type="email" placeholder="m@example.com" value={email} onChange={e => setEmail(e.target.value)} className="h-12 bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" required />
         </div>
         <div className="space-y-2">
           <div className="flex items-center justify-between">
             <label className="text-sm font-medium text-foreground">Password</label>
-            <Link href="/forgot-password" className="text-sm text-primary hover:underline">
+            <Link href="/forgot-password" className="text-sm text-primary hover:text-primary/80 transition-colors hover:underline">
               Forgot password?
             </Link>
           </div>
-          <Input type="password" placeholder="••••••••" className="h-12 bg-card border-border" />
+          <Input type="password" placeholder="••••••••" value={password} onChange={e => setPassword(e.target.value)} className="h-12 bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" required />
         </div>
-        <Button className="w-full h-12 font-semibold text-base">Sign In</Button>
+        <Button type="submit" disabled={isSubmitting} className="w-full h-12 font-bold text-base bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
+          {isSubmitting ? "Signing In..." : "Sign In"}
+        </Button>
       </form>
 
       <div className="mt-8 text-center text-sm text-muted-foreground">

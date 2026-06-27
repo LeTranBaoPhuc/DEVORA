@@ -9,6 +9,7 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/components/language-provider";
+import { useAuth } from "@/components/auth-provider";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -22,6 +23,7 @@ import {
 export function TopNav() {
   const { theme, setTheme } = useTheme();
   const { lang, setLang, t } = useLanguage();
+  const { user, logout, isLoading } = useAuth();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
@@ -92,38 +94,61 @@ export function TopNav() {
               </Button>
             )}
 
-            <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground rounded-full">
-              <MessageSquare className="h-5 w-5" />
-            </Button>
-            <Button onClick={() => toast.info("You have 3 new notifications")} variant="ghost" size="icon" className="relative rounded-full text-muted-foreground hover:text-foreground">
-              <Bell className="h-5 w-5" />
-              <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full"></span>
-            </Button>
+            {!user ? (
+              <div className="flex items-center gap-2 ml-2">
+                <Link href="/login">
+                  <Button variant="ghost" className="font-semibold hover:text-primary transition-colors hidden sm:inline-flex">Log in</Button>
+                </Link>
+                <Link href="/register">
+                  <Button className="font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_10px_rgba(204,255,0,0.3)] transition-all">
+                    Sign up
+                  </Button>
+                </Link>
+              </div>
+            ) : (
+              <>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground rounded-full">
+                  <MessageSquare className="h-5 w-5" />
+                </Button>
+                <Button onClick={() => toast.info("You have 3 new notifications")} variant="ghost" size="icon" className="relative rounded-full text-muted-foreground hover:text-foreground">
+                  <Bell className="h-5 w-5" />
+                  <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full shadow-[0_0_5px_rgba(204,255,0,0.5)]"></span>
+                </Button>
 
-            <DropdownMenu>
-              <DropdownMenuTrigger className="p-0 border-none bg-transparent hover:bg-transparent cursor-pointer rounded-full outline-none">
-                <Avatar className="h-8 w-8 border border-border hover:border-primary transition-colors">
-                  <AvatarImage src="https://github.com/shadcn.png" />
-                  <AvatarFallback>JN</AvatarFallback>
-                </Avatar>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuGroup>
-                  <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                </DropdownMenuGroup>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Link href="/dashboard/seller" className="cursor-pointer w-full">Seller Dashboard</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => toast.info("Settings page is under construction")} className="text-muted-foreground cursor-pointer">
-                  Profile Settings
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={() => toast.success("Logged out successfully")} className="text-destructive cursor-pointer">
-                  Log out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+                <DropdownMenu>
+                  <DropdownMenuTrigger className="p-0 border-none bg-transparent hover:bg-transparent cursor-pointer rounded-full outline-none ml-2">
+                    <Avatar className="h-9 w-9 border-2 border-border hover:border-primary transition-all">
+                      <AvatarImage src={user.avatar} />
+                      <AvatarFallback>{user.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                    </Avatar>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-56 mt-1">
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel className="font-normal">
+                        <div className="flex flex-col space-y-1">
+                          <p className="text-sm font-medium leading-none">{user.username}</p>
+                          <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                        </div>
+                      </DropdownMenuLabel>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem>
+                      <Link href="/dashboard/buyer" className="cursor-pointer w-full">Dashboard / Mua hàng</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link href="/register-seller" className="cursor-pointer w-full text-primary hover:text-primary/80 font-medium">Kênh người bán (Trở thành Seller)</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link href="/settings" className="cursor-pointer w-full">Cài đặt tài khoản</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuItem onClick={() => { logout(); toast.success("Logged out successfully"); }} className="text-destructive cursor-pointer focus:text-destructive">
+                      Log out
+                    </DropdownMenuItem>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </>
+            )}
           </div>
         </div>
       </div>

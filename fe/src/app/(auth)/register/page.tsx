@@ -7,7 +7,6 @@ import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function RegisterPage() {
-  const [role, setRole] = useState<"buyer" | "seller" | "both">("buyer");
 
   return (
     <>
@@ -20,67 +19,41 @@ export default function RegisterPage() {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">First Name</label>
-            <Input type="text" placeholder="Alex" className="h-12 bg-card border-border" />
+            <Input type="text" placeholder="Alex" className="h-12 bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Last Name</label>
-            <Input type="text" placeholder="Rivera" className="h-12 bg-card border-border" />
+            <Input type="text" placeholder="Rivera" className="h-12 bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
           </div>
         </div>
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">Username</label>
-          <Input type="text" placeholder="alexrivera" className="h-12 bg-card border-border" />
+          <Input type="text" placeholder="alexrivera" className="h-12 bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
         </div>
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">Email</label>
-          <Input type="email" placeholder="m@example.com" className="h-12 bg-card border-border" />
+          <Input type="email" placeholder="m@example.com" className="h-12 bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
         </div>
 
         <div className="space-y-2">
           <label className="text-sm font-medium text-foreground">Password</label>
-          <Input type="password" placeholder="••••••••" className="h-12 bg-card border-border" />
+          <Input type="password" placeholder="••••••••" className="h-12 bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
         </div>
 
-        <div className="space-y-3 pt-2">
-          <label className="text-sm font-medium text-foreground">I want to...</label>
-          <div className="grid grid-cols-3 gap-3">
-            <Button 
-              type="button" 
-              variant={role === "buyer" ? "default" : "outline"}
-              className={`h-12 ${role === "buyer" ? "" : "bg-card border-border hover:bg-secondary"}`}
-              onClick={() => setRole("buyer")}
-            >
-              Buy
-            </Button>
-            <Button 
-              type="button" 
-              variant={role === "seller" ? "default" : "outline"}
-              className={`h-12 ${role === "seller" ? "" : "bg-card border-border hover:bg-secondary"}`}
-              onClick={() => setRole("seller")}
-            >
-              Sell
-            </Button>
-            <Button 
-              type="button" 
-              variant={role === "both" ? "default" : "outline"}
-              className={`h-12 ${role === "both" ? "" : "bg-card border-border hover:bg-secondary"}`}
-              onClick={() => setRole("both")}
-            >
-              Both
-            </Button>
-          </div>
-        </div>
+
 
         <div className="flex items-center space-x-2 pt-4">
-          <Checkbox id="terms" />
+          <Checkbox id="terms" className="data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground data-[state=checked]:border-primary" />
           <label htmlFor="terms" className="text-sm text-muted-foreground leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-            I agree to the <Link href="/terms" className="text-foreground hover:text-primary underline underline-offset-4">Terms of Service</Link> and <Link href="/privacy" className="text-foreground hover:text-primary underline underline-offset-4">Privacy Policy</Link>.
+            I agree to the <Link href="/terms" className="text-foreground hover:text-primary transition-colors underline underline-offset-4">Terms of Service</Link> and <Link href="/privacy" className="text-foreground hover:text-primary transition-colors underline underline-offset-4">Privacy Policy</Link>.
           </label>
         </div>
 
-        <Button className="w-full h-12 font-semibold text-base mt-4">Create Account</Button>
+        <Button className="w-full h-12 font-bold text-base mt-4 bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
+          Create Account
+        </Button>
       </form>
 
       <div className="mt-8 text-center text-sm text-muted-foreground">

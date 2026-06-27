@@ -10,12 +10,13 @@ export default function AuthLayout({
     <div className="min-h-screen flex">
       {/* Left Branding Panel */}
       <div className="hidden lg:flex flex-1 flex-col justify-between bg-card border-r border-border p-12 relative overflow-hidden">
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_var(--tw-gradient-stops))] from-primary/10 via-background to-background"></div>
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(204,255,0,0.15),_transparent_50%)]"></div>
         <div className="relative z-10">
-          <Link href="/" className="inline-flex items-center gap-2 mb-12">
-            <div className="bg-primary text-primary-foreground font-heading font-bold px-3 py-1.5 rounded-md tracking-tighter text-xl">
-              DEVORA
+          <Link href="/" className="inline-flex items-center gap-3 mb-12 group">
+            <div className="bg-primary text-primary-foreground font-heading font-black w-10 h-10 flex items-center justify-center rounded-full text-xl shadow-[0_0_15px_rgba(204,255,0,0.5)] group-hover:shadow-[0_0_25px_rgba(204,255,0,0.8)] transition-all">
+              D
             </div>
+            <span className="font-heading font-black text-2xl tracking-tighter">DEVORA</span>
           </Link>
           <h1 className="text-4xl font-heading font-bold leading-tight mb-6">
             The marketplace built for <br /> <span className="text-primary">vibe coders</span>.
