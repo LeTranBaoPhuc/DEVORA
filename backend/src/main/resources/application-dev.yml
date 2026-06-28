@@ -64,7 +64,7 @@ jwt:
   # 7 days
   refresh-key-expiration: 604800000
   # 10 mins
-  reset-password-key-expiration: 600000
+  reset-password-key-expiration: 300000
 
 logging:
   level:

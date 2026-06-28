@@ -52,7 +52,7 @@ jwt:
   reset-password-key: ${JWT_RESET_PASSWORD_KEY}
   access-key-expiration: ${JWT_ACCESS_KEY_EXPIRATION:900000}
   refresh-key-expiration: ${JWT_REFRESH_KEY_EXPIRATION:604800000}
-  reset-password-key-expiration: ${JWT_RESET_PASSWORD_KEY_EXPIRATION:600000}
+  reset-password-key-expiration: ${JWT_RESET_PASSWORD_KEY_EXPIRATION:300000}
 
 app:
   frontend-url: ${FRONTEND_BASE_URL:http://localhost:3000}
