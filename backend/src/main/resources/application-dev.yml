@@ -2,8 +2,7 @@ spring:
   config:
     activate:
       on-profile: dev
-  profiles:
-    include: local
+    import: optional:classpath:application-local.yml
   devtools:
     add-properties: true
   datasource:
