@@ -64,19 +64,18 @@ public class ApiAuthController {
     public ApiResponse register(@Valid @RequestBody RegisterRequest request) {
         log.info("Register request for user: {}", request.getUsername());
 
-        Long userId = authenticationService.register(request);
+        authenticationService.register(request);
         return ApiResponse.builder()
                 .status(200)
                 .message("Register successfully, check email verification")
-                .data(userId)
                 .build();
     }
 
     @PostMapping("verify-register")
-    public ApiResponse verifyRegister(@RequestParam String verifyCode) {
-        log.info("Verify register request for user, verify code: {}", verifyCode);
+    public ApiResponse verifyRegister(@RequestParam String email, @RequestParam String verifyCode) {
+        log.info("Verify register request for user email: {}, verify code: {}", email, verifyCode);
 
-        boolean isSuccess = authenticationService.confirmRegister(verifyCode);
+        boolean isSuccess = authenticationService.confirmRegister(email, verifyCode);
 
         return ApiResponse.builder()
                 .status(isSuccess ? 200 : 404)

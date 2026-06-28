@@ -91,7 +91,7 @@ public class MailServiceImpl implements MailService {
             Context context = new Context();
             context.setVariable("otp", otp);
 
-            helper.setFrom(emailFrom, "Template Service");
+            helper.setFrom(emailFrom, "DEVORA Support");
             helper.setTo(emailTo);
             helper.setSubject("Mã xác thực OTP");
 
@@ -102,6 +102,7 @@ public class MailServiceImpl implements MailService {
             log.info("OTP email sent successfully to {}", emailTo);
         } catch (Exception e) {
             log.error("Failed to send OTP email to {}: {}", emailTo, e.getMessage());
+            throw new RuntimeException("Failed to send email OTP: " + e.getMessage());
         }
     }
 }
