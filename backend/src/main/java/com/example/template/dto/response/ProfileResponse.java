@@ -22,6 +22,7 @@ public class ProfileResponse {
     private String avatarUrl;
     private String role;
     private EGender gender;
+    @com.fasterxml.jackson.annotation.JsonFormat(shape = com.fasterxml.jackson.annotation.JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy")
     private LocalDate dateOfBirth;
     private EUserStatus status;
     private LocalDate createdAt;

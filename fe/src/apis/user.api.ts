@@ -25,6 +25,20 @@ export const userApi = {
       method: 'PATCH',
       headers,
       body: formData,
-    }).then(res => res.json());
-  }
+    }).then(async res => {
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.message || 'Upload failed');
+      return data;
+    });
+  },
+
+  sendEmailOtp: (data: { newEmail: string }) => http<any>('/api/users/profile/email-otp/send', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  }),
+
+  verifyEmailOtp: (data: { otp: string, newEmail: string }) => http<any>('/api/users/profile/email-otp/verify', {
+    method: 'POST',
+    body: JSON.stringify(data),
+  })
 };

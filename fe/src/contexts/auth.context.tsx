@@ -10,8 +10,10 @@ import { User } from "@/types";
 type AuthContextType = {
   user: User | null;
   login: (email: string, password: string) => Promise<boolean>;
+  loginWithGoogle: (token: string) => Promise<boolean>;
   register: (data: any) => Promise<boolean>;
   logout: () => void;
+  refreshProfile: () => Promise<void>;
   isLoading: boolean;
 };
 
@@ -65,6 +67,23 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const loginWithGoogle = async (token: string): Promise<boolean> => {
+    try {
+      const response = await authApi.googleLogin({ token });
+      if (response && response.accessToken) {
+        localStorage.setItem("accessToken", response.accessToken);
+        if (response.refreshToken) {
+          localStorage.setItem("refreshToken", response.refreshToken);
+        }
+        await fetchProfile();
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      throw error;
+    }
+  };
+
   const register = async (data: any): Promise<boolean> => {
     try {
       const response = await authApi.register(data);
@@ -96,7 +115,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, register, logout, isLoading }}>
+    <AuthContext.Provider value={{ user, login, loginWithGoogle, register, logout, refreshProfile: fetchProfile, isLoading }}>
       {children}
     </AuthContext.Provider>
   );

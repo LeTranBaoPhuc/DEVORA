@@ -32,4 +32,7 @@ build/
 ### VS Code ###
 .vscode/
 
+### Custom secrets ###
+application-local.yml
+
 *.env

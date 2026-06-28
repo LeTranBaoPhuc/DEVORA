@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import { Save, ShieldAlert, UploadCloud } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -8,8 +9,162 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
+import { useAuth } from "@/hooks/useAuth";
+import { userApi } from "@/apis/user.api";
+import { toast } from "sonner";
+import { format, parse } from "date-fns";
 
 export default function SettingsPage() {
+  const { user, refreshProfile } = useAuth();
+  
+  // Profile form state
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
+  const [gender, setGender] = useState("MALE");
+  const [dateOfBirth, setDateOfBirth] = useState("");
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Password state
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmNewPassword, setConfirmNewPassword] = useState("");
+  const [isChangingPassword, setIsChangingPassword] = useState(false);
+
+  // Email OTP state
+  const [newEmail, setNewEmail] = useState("");
+  const [otp, setOtp] = useState("");
+  const [isSendingOtp, setIsSendingOtp] = useState(false);
+  const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
+  const [showOtpInput, setShowOtpInput] = useState(false);
+
+  useEffect(() => {
+    if (user) {
+      setFirstName(user.firstName || "");
+      setLastName(user.lastName || "");
+      setGender(user.gender || "MALE");
+      
+      if (user.dateOfBirth) {
+        // user.dateOfBirth from API is usually dd/MM/yyyy
+        try {
+          const parsedDate = parse(user.dateOfBirth, "dd/MM/yyyy", new Date());
+          if (!isNaN(parsedDate.getTime())) {
+            setDateOfBirth(format(parsedDate, "yyyy-MM-dd"));
+          } else {
+             // If it's already ISO format from API somehow
+            const isoParsed = new Date(user.dateOfBirth);
+            if (!isNaN(isoParsed.getTime())) setDateOfBirth(format(isoParsed, "yyyy-MM-dd"));
+          }
+        } catch(e) {
+          console.error("Error parsing date", e);
+        }
+      }
+    }
+  }, [user]);
+
+  const handleSaveProfile = async () => {
+    if (!firstName || !lastName || !gender || !dateOfBirth) {
+      toast.error("Vui lòng điền đầy đủ các trường thông tin bắt buộc.");
+      return;
+    }
+
+    setIsSaving(true);
+    try {
+      // Format date to dd/MM/yyyy as expected by backend
+      const formattedDate = format(new Date(dateOfBirth), "dd/MM/yyyy");
+      
+      await userApi.updateProfile({
+        firstName,
+        lastName,
+        gender,
+        dateOfBirth: formattedDate,
+      });
+      
+      toast.success("Cập nhật thông tin thành công!");
+      await refreshProfile(); // reload data from backend
+    } catch (error: any) {
+      console.error(error);
+      toast.error(error?.message || "Có lỗi xảy ra khi cập nhật thông tin.");
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
+  const handleAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files[0]) {
+      const file = e.target.files[0];
+      const formData = new FormData();
+      formData.append("image", file);
+      try {
+        toast.info("Đang tải ảnh lên...");
+        await userApi.uploadAvatar(formData);
+        toast.success("Đổi Avatar thành công!");
+        await refreshProfile();
+      } catch (error: any) {
+        toast.error("Lỗi khi tải ảnh lên.");
+      }
+    }
+  };
+
+  const handleChangePassword = async () => {
+    if (!oldPassword || !newPassword || !confirmNewPassword) {
+      toast.error("Vui lòng điền đầy đủ các trường mật khẩu.");
+      return;
+    }
+    if (newPassword !== confirmNewPassword) {
+      toast.error("Mật khẩu mới không khớp.");
+      return;
+    }
+    setIsChangingPassword(true);
+    try {
+      await userApi.changePassword({ oldPassword, newPassword, confirmNewPassword });
+      toast.success("Đổi mật khẩu thành công!");
+      setOldPassword("");
+      setNewPassword("");
+      setConfirmNewPassword("");
+    } catch (error: any) {
+      toast.error(error?.message || "Lỗi khi đổi mật khẩu.");
+    } finally {
+      setIsChangingPassword(false);
+    }
+  };
+
+  const handleSendOtp = async () => {
+    if (!newEmail) {
+      toast.error("Vui lòng nhập Email mới.");
+      return;
+    }
+    setIsSendingOtp(true);
+    try {
+      await userApi.sendEmailOtp({ newEmail });
+      toast.success("Mã OTP đã được gửi đến email hiện tại của bạn!");
+      setShowOtpInput(true);
+    } catch (error: any) {
+      toast.error(error?.message || "Lỗi khi gửi OTP.");
+    } finally {
+      setIsSendingOtp(false);
+    }
+  };
+
+  const handleVerifyOtp = async () => {
+    if (!otp) {
+      toast.error("Vui lòng nhập mã OTP.");
+      return;
+    }
+    setIsVerifyingOtp(true);
+    try {
+      await userApi.verifyEmailOtp({ newEmail, otp });
+      toast.success("Đổi Email thành công!");
+      setShowOtpInput(false);
+      setNewEmail("");
+      setOtp("");
+      await refreshProfile();
+    } catch (error: any) {
+      toast.error(error?.message || "Lỗi khi xác nhận OTP.");
+    } finally {
+      setIsVerifyingOtp(false);
+    }
+  };
+
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-12 pt-8">
       <div>
@@ -30,18 +185,26 @@ export default function SettingsPage() {
           <Card className="border-border bg-card shadow-sm">
             <CardHeader>
               <CardTitle>Public Profile</CardTitle>
-              <CardDescription>This information will be displayed publicly so be careful what you share.</CardDescription>
+              <CardDescription>Thông tin này sẽ được hiển thị công khai trên hồ sơ của bạn.</CardDescription>
             </CardHeader>
             <CardContent className="space-y-6">
               <div className="flex items-center gap-6 pb-6 border-b border-border">
                 <Avatar className="w-20 h-20 border-2 border-primary shadow-[0_0_10px_rgba(204,255,0,0.2)]">
-                  <AvatarImage src="https://i.pravatar.cc/150?u=a042581f4e29026704d" />
-                  <AvatarFallback>NN</AvatarFallback>
+                  <AvatarImage src={user?.avatarUrl || "https://i.pravatar.cc/150"} />
+                  <AvatarFallback>{user?.firstName?.charAt(0) || "U"}</AvatarFallback>
                 </Avatar>
                 <div className="space-y-2">
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="hover:text-primary hover:border-primary transition-colors">Change Avatar</Button>
-                    <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10">Remove</Button>
+                    <Button variant="outline" size="sm" className="hover:text-primary hover:border-primary transition-colors relative overflow-hidden">
+                      Đổi Avatar
+                      <input 
+                        type="file" 
+                        accept="image/*"
+                        onChange={handleAvatarChange}
+                        className="absolute inset-0 opacity-0 cursor-pointer"
+                      />
+                    </Button>
+                    <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10">Xóa</Button>
                   </div>
                   <p className="text-xs text-muted-foreground">JPG, GIF or PNG. 1MB max.</p>
                 </div>
@@ -49,43 +212,68 @@ export default function SettingsPage() {
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">First Name</label>
-                  <Input defaultValue="Alex" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+                  <label className="text-sm font-medium">Tên (First Name) *</label>
+                  <Input 
+                    value={firstName} 
+                    onChange={(e) => setFirstName(e.target.value)} 
+                    className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" 
+                  />
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Last Name</label>
-                  <Input defaultValue="Rivera" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+                  <label className="text-sm font-medium">Họ (Last Name) *</label>
+                  <Input 
+                    value={lastName} 
+                    onChange={(e) => setLastName(e.target.value)} 
+                    className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" 
+                  />
                 </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Username</label>
-                <div className="relative">
-                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">devora.co/</span>
-                  <Input defaultValue="NeuralNinja" className="pl-[85px] bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <label className="text-sm font-medium">Bio</label>
-                <Textarea defaultValue="Full-stack AI developer specializing in LangChain and autonomous agents." className="bg-secondary border-border min-h-[100px] focus-visible:ring-primary focus-visible:border-primary transition-colors" />
-                <p className="text-xs text-muted-foreground">Brief description for your profile.</p>
               </div>
 
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">Website URL</label>
-                  <Input defaultValue="https://neuralninja.dev" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+                  <label className="text-sm font-medium">Giới tính (Gender) *</label>
+                  <select
+                    value={gender}
+                    onChange={(e) => setGender(e.target.value)}
+                    className="flex h-10 w-full rounded-md border border-input bg-secondary px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                  >
+                    <option value="MALE">Nam (Male)</option>
+                    <option value="FEMALE">Nữ (Female)</option>
+                    <option value="OTHER">Khác (Other)</option>
+                  </select>
                 </div>
                 <div className="space-y-2">
-                  <label className="text-sm font-medium">GitHub Username</label>
-                  <Input defaultValue="neuralninja" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+                  <label className="text-sm font-medium">Ngày sinh (Date of Birth) *</label>
+                  <Input 
+                    type="date"
+                    value={dateOfBirth} 
+                    onChange={(e) => setDateOfBirth(e.target.value)} 
+                    className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" 
+                  />
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Tên đăng nhập (Username)</label>
+                <div className="relative">
+                  <span className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground">devora.co/</span>
+                  <Input readOnly value={user?.username || ""} className="pl-[85px] bg-secondary/50 border-border opacity-70 cursor-not-allowed" />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Email</label>
+                <Input readOnly value={user?.email || ""} className="bg-secondary/50 border-border opacity-70 cursor-not-allowed" />
+                <p className="text-xs text-muted-foreground">Email được bảo vệ bằng OTP. Vui lòng sang tab Security để đổi.</p>
+              </div>
+
               <div className="pt-4 flex justify-end">
-                <Button className="font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
-                  <Save className="w-4 h-4 mr-2" /> Save Changes
+                <Button 
+                  onClick={handleSaveProfile} 
+                  disabled={isSaving}
+                  className="font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all"
+                >
+                  <Save className="w-4 h-4 mr-2" /> {isSaving ? "Đang lưu..." : "Lưu thay đổi"}
                 </Button>
               </div>
             </CardContent>
@@ -95,40 +283,58 @@ export default function SettingsPage() {
         <TabsContent value="security">
           <Card className="border-border bg-card mb-6 shadow-sm">
             <CardHeader>
-              <CardTitle>Change Password</CardTitle>
+              <CardTitle>Đổi Mật Khẩu</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="space-y-2 max-w-md">
-                <label className="text-sm font-medium">Current Password</label>
-                <Input type="password" placeholder="••••••••" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+                <label className="text-sm font-medium">Mật khẩu hiện tại</label>
+                <Input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="••••••••" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
               </div>
               <div className="space-y-2 max-w-md">
-                <label className="text-sm font-medium">New Password</label>
-                <Input type="password" placeholder="••••••••" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+                <label className="text-sm font-medium">Mật khẩu mới</label>
+                <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
               </div>
               <div className="space-y-2 max-w-md">
-                <label className="text-sm font-medium">Confirm New Password</label>
-                <Input type="password" placeholder="••••••••" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+                <label className="text-sm font-medium">Xác nhận mật khẩu mới</label>
+                <Input type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} placeholder="••••••••" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
               </div>
-              <Button className="mt-2 font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
-                Update Password
+              <Button onClick={handleChangePassword} disabled={isChangingPassword} className="mt-2 font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
+                {isChangingPassword ? "Đang xử lý..." : "Cập nhật mật khẩu"}
               </Button>
             </CardContent>
           </Card>
 
           <Card className="border-border bg-card shadow-sm">
             <CardHeader>
-              <CardTitle>Two-Factor Authentication (2FA)</CardTitle>
-              <CardDescription>Add an extra layer of security to your account.</CardDescription>
+              <CardTitle>Đổi Email (Xác thực OTP)</CardTitle>
+              <CardDescription>Bảo vệ tài khoản của bạn bằng cách xác minh qua email hiện tại.</CardDescription>
             </CardHeader>
-            <CardContent>
-              <div className="flex items-center justify-between p-4 border border-border bg-secondary/30 rounded-lg">
-                <div>
-                  <h4 className="font-semibold text-foreground">Authenticator App</h4>
-                  <p className="text-sm text-muted-foreground mt-1">Use an app like Google Authenticator or Authy to generate one-time codes.</p>
-                </div>
-                <Button variant="outline" className="hover:text-primary hover:border-primary transition-colors">Enable</Button>
+            <CardContent className="space-y-4">
+              <div className="space-y-2 max-w-md">
+                <label className="text-sm font-medium">Email Mới</label>
+                <Input disabled={showOtpInput} type="email" value={newEmail} onChange={(e) => setNewEmail(e.target.value)} placeholder="new-email@example.com" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
               </div>
+              
+              {!showOtpInput ? (
+                <Button onClick={handleSendOtp} disabled={isSendingOtp} className="mt-2 font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
+                  {isSendingOtp ? "Đang gửi..." : "Gửi mã OTP"}
+                </Button>
+              ) : (
+                <>
+                  <div className="space-y-2 max-w-md mt-4">
+                    <label className="text-sm font-medium">Nhập mã OTP (Đã gửi vào {user?.email})</label>
+                    <Input type="text" value={otp} onChange={(e) => setOtp(e.target.value)} placeholder="123456" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+                  </div>
+                  <div className="flex gap-2 mt-2">
+                    <Button onClick={handleVerifyOtp} disabled={isVerifyingOtp} className="font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
+                      {isVerifyingOtp ? "Đang xử lý..." : "Xác nhận đổi Email"}
+                    </Button>
+                    <Button variant="outline" onClick={() => setShowOtpInput(false)} className="hover:text-primary hover:border-primary transition-colors">
+                      Hủy
+                    </Button>
+                  </div>
+                </>
+              )}
             </CardContent>
           </Card>
         </TabsContent>
