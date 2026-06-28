@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { ArrowLeft, Box, Search, CheckCircle, Server, FileCode, Ban } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -103,12 +104,12 @@ export default function SellerOrdersPage() {
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
                         {order.status === "Pending Setup" && order.type === "MANAGED" && (
-                          <Button size="sm" className="h-8 bg-primary text-primary-foreground hover:bg-primary/90">
+                          <Button size="sm" onClick={() => toast.success(`Server setup initiated for ${order.id}`)} className="h-8 bg-primary text-primary-foreground hover:bg-primary/90">
                             Set up Server
                           </Button>
                         )}
                         {order.status === "Active" && order.type === "MANAGED" && (
-                          <Button variant="outline" size="sm" className="h-8 border-info text-info hover:bg-info/10">
+                          <Button variant="outline" size="sm" onClick={() => toast.info(`Managing instance ${order.id}`)} className="h-8 border-info text-info hover:bg-info/10">
                             Manage Instance
                           </Button>
                         )}

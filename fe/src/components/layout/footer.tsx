@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MessageSquare, Bot, Globe } from "lucide-react";
+import { MessageSquare, Bot, Globe, Twitter, Github } from "lucide-react";
 
 export function Footer() {
   return (
@@ -12,15 +12,15 @@ export function Footer() {
             <p className="text-sm text-muted-foreground mb-6">
               The premier marketplace for vibe coders. Buy and sell AI agents, mini apps, and automation scripts.
             </p>
-            <div className="flex items-center gap-4">
-              <Link href="#" className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
+            <div className="flex gap-4">
+              <Link href="https://twitter.com" className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
+                <Twitter className="w-4 h-4" />
+              </Link>
+              <Link href="https://github.com" className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
+                <Github className="w-4 h-4" />
+              </Link>
+              <Link href="https://discord.com" className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
                 <MessageSquare className="w-4 h-4" />
-              </Link>
-              <Link href="#" className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
-                <Globe className="w-4 h-4" />
-              </Link>
-              <Link href="#" className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
-                <Bot className="w-4 h-4" />
               </Link>
             </div>
           </div>
@@ -28,30 +28,30 @@ export function Footer() {
           {/* Links */}
           <div>
             <h3 className="font-heading font-bold mb-4">Marketplace</h3>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><Link href="#" className="hover:text-primary transition-colors">Browse Products</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Auctions Job Board</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">AI Agents</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Prompt Templates</Link></li>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li><Link href="/marketplace" className="hover:text-primary transition-colors">Browse Products</Link></li>
+              <li><Link href="/auctions" className="hover:text-primary transition-colors">Auctions Job Board</Link></li>
+              <li><Link href="/marketplace?category=ai-agents" className="hover:text-primary transition-colors">AI Agents</Link></li>
+              <li><Link href="/marketplace?category=templates" className="hover:text-primary transition-colors">Prompt Templates</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-heading font-bold mb-4">For Sellers</h3>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><Link href="#" className="hover:text-primary transition-colors">Start Selling</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Seller Guide</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Payment & Fees</Link></li>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li><Link href="/register-seller" className="hover:text-primary transition-colors">Start Selling</Link></li>
+              <li><Link href="/support" className="hover:text-primary transition-colors">Seller Guide</Link></li>
+              <li><Link href="/legal" className="hover:text-primary transition-colors">Payment & Fees</Link></li>
             </ul>
           </div>
 
           <div>
             <h3 className="font-heading font-bold mb-4">Support</h3>
-            <ul className="space-y-3 text-sm text-muted-foreground">
-              <li><Link href="#" className="hover:text-primary transition-colors">Help Center</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Dispute Resolution</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Terms of Service</Link></li>
-              <li><Link href="#" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
+            <ul className="space-y-2 text-sm text-muted-foreground">
+              <li><Link href="/support" className="hover:text-primary transition-colors">Help Center</Link></li>
+              <li><Link href="/support" className="hover:text-primary transition-colors">Dispute Resolution</Link></li>
+              <li><Link href="/legal" className="hover:text-primary transition-colors">Terms of Service</Link></li>
+              <li><Link href="/legal" className="hover:text-primary transition-colors">Privacy Policy</Link></li>
             </ul>
           </div>
         </div>
