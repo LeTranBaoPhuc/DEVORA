@@ -95,12 +95,12 @@ export function TopNav() {
                   </Link>
                 </Button>
                 <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
+                  <DropdownMenuTrigger render={
                     <Button variant="ghost" size="icon" className="relative rounded-full text-muted-foreground hover:text-foreground">
                       <Bell className="h-5 w-5" />
                       <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full shadow-[0_0_5px_rgba(204,255,0,0.5)]"></span>
                     </Button>
-                  </DropdownMenuTrigger>
+                  } />
                   <DropdownMenuContent align="end" className="w-80">
                     <div className="flex items-center justify-between px-4 py-2 border-b border-border">
                       <span className="font-semibold text-sm">Thông báo</span>
@@ -175,24 +175,24 @@ export function TopNav() {
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                      <DropdownMenuItem asChild>
+                      <DropdownMenuItem render={
                         <Link href="/dashboard/buyer" className="cursor-pointer w-full text-sm font-medium">My Dashboard</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
+                      } />
+                      <DropdownMenuItem render={
                         <Link href="/dashboard/buyer/orders" className="cursor-pointer w-full text-sm font-medium">My Purchases</Link>
-                      </DropdownMenuItem>
+                      } />
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                      <DropdownMenuItem asChild>
+                      <DropdownMenuItem render={
                         <Link href="/dashboard/seller" className="cursor-pointer w-full text-sm font-medium text-primary focus:text-primary focus:bg-primary/10">Truy cập trang người bán</Link>
-                      </DropdownMenuItem>
+                      } />
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                      <DropdownMenuItem asChild>
+                      <DropdownMenuItem render={
                         <Link href="/settings" className="cursor-pointer w-full text-sm font-medium">Account Settings</Link>
-                      </DropdownMenuItem>
+                      } />
                       <DropdownMenuItem onClick={() => { logout(); toast.success("Logged out successfully"); }} className="text-destructive cursor-pointer focus:text-destructive text-sm font-medium">
                         Log out
                       </DropdownMenuItem>

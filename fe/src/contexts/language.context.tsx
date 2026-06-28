@@ -2,7 +2,7 @@
 
 import React, { createContext, useContext, useState } from "react";
 
-type Language = "EN" | "VI";
+type Language = "EN" | "VI" | "JP" | "KR" | "FR";
 
 interface LanguageContextType {
   lang: Language;
@@ -32,7 +32,7 @@ const translations: Record<Language, Record<string, string>> = {
     "hero.stats.transactions": "Transactions",
   },
   VI: {
-    "nav.marketplace": "Chợ Ứng Dụng",
+    "nav.marketplace": "Chợ Sản Phẩm",
     "nav.auctions": "Đấu Giá",
     "nav.more": "Thêm",
     "nav.about": "Về Chúng Tôi",
@@ -50,7 +50,10 @@ const translations: Record<Language, Record<string, string>> = {
     "hero.btn_post": "ĐĂNG YÊU CẦU",
     "hero.stats.products": "Tổng Sản Phẩm",
     "hero.stats.transactions": "Giao Dịch",
-  }
+  },
+  JP: {},
+  KR: {},
+  FR: {}
 };
 
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);

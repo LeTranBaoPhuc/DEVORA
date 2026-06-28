@@ -127,11 +127,11 @@ export default function ProductDetailPage() {
             
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <Dialog>
-                <DialogTrigger asChild>
+                <DialogTrigger render={
                   <Button size="lg" className="rounded-full gap-2 shadow-xl font-semibold bg-primary hover:bg-primary/90 text-primary-foreground border-none">
                     <Play className="w-5 h-5 fill-current" /> Live Preview
                   </Button>
-                </DialogTrigger>
+                } />
                 <DialogContent className="max-w-6xl w-[95vw] h-[90vh] p-0 border-none bg-black overflow-hidden flex flex-col sm:rounded-xl">
                   <div className="h-14 bg-zinc-900 flex items-center justify-between px-6 text-white border-b border-zinc-800 shrink-0">
                     <div className="flex items-center gap-3">
@@ -144,11 +144,11 @@ export default function ProductDetailPage() {
                           <ExternalLink className="w-4 h-4" />
                         </a>
                       </Button>
-                      <DialogClose asChild>
+                      <DialogClose render={
                         <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800">
                           <X className="w-5 h-5" />
                         </Button>
-                      </DialogClose>
+                      } />
                     </div>
                   </div>
                   <div className="flex-1 w-full bg-zinc-950 relative">
