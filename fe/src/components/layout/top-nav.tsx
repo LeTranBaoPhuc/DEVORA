@@ -38,7 +38,7 @@ export function TopNav() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-8">
           {/* Logo & Mobile Menu */}
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="md:hidden">
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => toast.info("Opening mobile menu...")}>
               <Menu className="h-6 w-6" />
               <span className="sr-only">Toggle menu</span>
             </Button>
@@ -183,6 +183,12 @@ export function TopNav() {
                 type="search" 
                 placeholder={t("nav.search")} 
                 className="w-full pl-9 border-none bg-transparent h-full focus-visible:ring-0 shadow-none text-sm rounded-none"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    toast.info(`Searching for: ${e.currentTarget.value}`);
+                  }
+                }}
               />
             </div>
           </div>

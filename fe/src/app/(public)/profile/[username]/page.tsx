@@ -1,6 +1,7 @@
 "use client";
 
 import { Star, ShieldCheck, Calendar, Download, Link as LinkIcon, MapPin, MessageSquare } from "lucide-react";
+import { toast } from "sonner";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -78,7 +79,10 @@ export default function UserProfilePage() {
                 </div>
               </div>
 
-              <Button className="w-full mb-6 font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
+              <Button 
+                onClick={() => toast.success(`Opening chat with ${PROFILE.username}...`)}
+                className="w-full mb-6 font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all"
+              >
                 <MessageSquare className="w-4 h-4 mr-2" /> Message
               </Button>
 
