@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, BarChart3, CreditCard, DollarSign, PackagePlus, PieChart, Wallet } from "lucide-react";
+import { ArrowRight, BarChart3, CreditCard, DollarSign, PackagePlus, PieChart, Wallet, Server } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -110,14 +110,25 @@ export default function SellerDashboardPage() {
             </TableHeader>
             <TableBody>
               {[
-                { id: "ORD-9502", buyer: "TechStartupCEO", product: "Customer Support Agent", amount: 149.00, status: "In Escrow", deadline: "-", statusColor: "bg-amber-500/20 text-amber-500" },
-                { id: "ORD-9501", buyer: "EcomHustler", product: "Airtable Sync Script", amount: 250.00, status: "Delivering", deadline: "Tomorrow", statusColor: "bg-info/20 text-info" },
-                { id: "ORD-9498", buyer: "CommunityManager", product: "Slack Summarizer", amount: 49.00, status: "Pending", deadline: "-", statusColor: "bg-muted text-muted-foreground" },
+                { id: "ORD-9502", type: "MANAGED", buyer: "TechStartupCEO", product: "Customer Support Agent", amount: 149.00, status: "In Escrow", deadline: "-", statusColor: "bg-amber-500/20 text-amber-500" },
+                { id: "ORD-9501", type: "SOURCE", buyer: "EcomHustler", product: "Airtable Sync Script", amount: 250.00, status: "Delivering", deadline: "Tomorrow", statusColor: "bg-info/20 text-info" },
+                { id: "ORD-9498", type: "MANAGED", buyer: "CommunityManager", product: "Slack Summarizer", amount: 49.00, status: "Pending", deadline: "-", statusColor: "bg-muted text-muted-foreground" },
               ].map((order) => (
                 <TableRow key={order.id} className="border-border hover:bg-secondary/30">
                   <TableCell className="font-mono text-xs text-muted-foreground">{order.id}</TableCell>
                   <TableCell className="font-medium text-sm">{order.buyer}</TableCell>
-                  <TableCell className="text-sm line-clamp-1 max-w-[200px]">{order.product}</TableCell>
+                  <TableCell className="text-sm">
+                    <div className="line-clamp-1 max-w-[200px]">{order.product}</div>
+                    {order.type === "MANAGED" ? (
+                      <Badge variant="outline" className="mt-1 text-[10px] px-1.5 py-0 border-info text-info bg-info/10">
+                        <Server className="w-3 h-3 mr-1" /> Managed Hosting
+                      </Badge>
+                    ) : (
+                      <Badge variant="outline" className="mt-1 text-[10px] px-1.5 py-0 border-muted-foreground text-muted-foreground bg-transparent">
+                        Source Code Only
+                      </Badge>
+                    )}
+                  </TableCell>
                   <TableCell className="font-mono text-sm">${order.amount.toFixed(2)}</TableCell>
                   <TableCell>
                     <Badge variant="outline" className={`${order.statusColor} border-none font-normal text-xs`}>

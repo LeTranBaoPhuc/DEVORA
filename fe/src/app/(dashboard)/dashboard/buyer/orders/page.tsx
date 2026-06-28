@@ -1,7 +1,7 @@
-﻿"use client";
+"use client";
 
 import Link from "next/link";
-import { ArrowLeft, Box, Search } from "lucide-react";
+import { ArrowLeft, Box, Search, Download, Server } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -10,11 +10,11 @@ import { Input } from "@/components/ui/input";
 
 export default function BuyerOrdersPage() {
   const orders = [
-    { id: "ORD-9482", item: "Customer Support Agent", seller: "NeuralNinja", amount: 149.00, status: "In Escrow", date: "2026-06-25", statusColor: "bg-amber-500/20 text-amber-500" },
-    { id: "ORD-9481", item: "Notion Habit Tracker", seller: "vibe_creator", amount: 29.99, status: "Delivered", date: "2026-06-20", statusColor: "bg-success/20 text-success" },
-    { id: "ORD-9455", item: "Slack Summarizer Bot", seller: "NeuralNinja", amount: 49.00, status: "Completed", date: "2026-06-15", statusColor: "bg-secondary text-foreground" },
-    { id: "ORD-9412", item: "Shopify Custom Theme", seller: "DesignPro", amount: 299.00, status: "Completed", date: "2026-05-28", statusColor: "bg-secondary text-foreground" },
-    { id: "ORD-9399", item: "Web Scraper Script", seller: "DataWiz", amount: 75.00, status: "Cancelled", date: "2026-05-10", statusColor: "bg-destructive/20 text-destructive" },
+    { id: "ORD-9482", type: "MANAGED", item: "Customer Support Agent", seller: "NeuralNinja", amount: 149.00, status: "In Escrow", date: "2026-06-25", statusColor: "bg-amber-500/20 text-amber-500", expiresAt: "2026-07-25" },
+    { id: "ORD-9481", type: "SOURCE", item: "Notion Habit Tracker", seller: "vibe_creator", amount: 29.99, status: "Delivered", date: "2026-06-20", statusColor: "bg-success/20 text-success" },
+    { id: "ORD-9455", type: "MANAGED", item: "Slack Summarizer Bot", seller: "NeuralNinja", amount: 49.00, status: "Completed", date: "2026-06-15", statusColor: "bg-secondary text-foreground", expiresAt: "2026-07-15" },
+    { id: "ORD-9412", type: "MANAGED", item: "Shopify Custom Theme", seller: "DesignPro", amount: 299.00, status: "Completed", date: "2026-05-28", statusColor: "bg-secondary text-foreground", expiresAt: "Expired" },
+    { id: "ORD-9399", type: "SOURCE", item: "Web Scraper Script", seller: "DataWiz", amount: 75.00, status: "Cancelled", date: "2026-05-10", statusColor: "bg-destructive/20 text-destructive" },
   ];
 
   return (
@@ -63,7 +63,19 @@ export default function BuyerOrdersPage() {
                     <Link href={`/dashboard/orders/${order.id}`} className="hover:text-primary transition-colors">{order.id}</Link>
                   </TableCell>
                   <TableCell className="text-sm">{order.date}</TableCell>
-                  <TableCell className="font-medium text-sm">{order.item}</TableCell>
+                  <TableCell className="font-medium text-sm">
+                    {order.item}
+                    {order.type === "MANAGED" && (
+                      <div className="flex items-center gap-1 text-xs text-info mt-1">
+                        <Server className="w-3 h-3" /> Managed Server
+                        {order.expiresAt === "Expired" ? (
+                          <span className="text-destructive ml-1">(Expired)</span>
+                        ) : (
+                          <span className="text-muted-foreground ml-1">until {order.expiresAt}</span>
+                        )}
+                      </div>
+                    )}
+                  </TableCell>
                   <TableCell className="text-sm text-muted-foreground">{order.seller}</TableCell>
                   <TableCell className="font-mono text-sm">${order.amount.toFixed(2)}</TableCell>
                   <TableCell>
@@ -72,9 +84,21 @@ export default function BuyerOrdersPage() {
                     </Badge>
                   </TableCell>
                   <TableCell className="text-right">
-                    <Link href={`/dashboard/orders/${order.id}`} className={buttonVariants({ variant: "ghost", size: "sm" })}>
-                      View Details
-                    </Link>
+                    <div className="flex justify-end gap-2">
+                      {(order.status === "Delivered" || order.status === "Completed") && (
+                        <Button variant="outline" size="sm" className="h-8" title="Download Source Code">
+                          <Download className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {order.type === "MANAGED" && (order.status === "Delivered" || order.status === "Completed") && (
+                        <Button size="sm" className="h-8 bg-primary text-primary-foreground hover:bg-primary/90" title="Renew Server">
+                          Renew
+                        </Button>
+                      )}
+                      <Link href={`/dashboard/orders/${order.id}`} className={buttonVariants({ variant: "ghost", size: "sm", className: "h-8" })}>
+                        Details
+                      </Link>
+                    </div>
                   </TableCell>
                 </TableRow>
               ))}

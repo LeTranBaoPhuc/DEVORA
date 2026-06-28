@@ -43,7 +43,10 @@ const PRODUCT = {
     isVerified: true,
     rating: 4.9,
     memberSince: "Jan 2024"
-  }
+  },
+  hasManagedHosting: true,
+  hostingPriceMonthly: 49.00,
+  hostingPriceYearly: 490.00,
 };
 
 const RELATED_PRODUCTS = [
@@ -64,6 +67,8 @@ const RELATED_PRODUCTS = [
 export default function ProductDetailPage() {
   const [activeImage, setActiveImage] = useState(0);
   const [isWishlisted, setIsWishlisted] = useState(false);
+  const [purchaseTier, setPurchaseTier] = useState<"source" | "managed">("source");
+  const [hostingBilling, setHostingBilling] = useState<"monthly" | "yearly">("monthly");
   const router = useRouter();
 
   const handleBuyNow = () => {
@@ -247,19 +252,72 @@ export default function ProductDetailPage() {
               </div>
             </div>
 
-            <div className="mb-6">
-              <div className="flex items-end gap-3 mb-2">
-                <span className="text-4xl font-mono font-bold text-primary">${PRODUCT.price.toFixed(2)}</span>
-                {PRODUCT.originalPrice && (
-                  <span className="text-lg font-mono text-muted-foreground line-through">${PRODUCT.originalPrice.toFixed(2)}</span>
-                )}
+            {/* Purchase Options */}
+            <div className="mb-6 space-y-3">
+              {/* Source Code Only Option */}
+              <div 
+                className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${purchaseTier === "source" ? "border-primary bg-primary/5" : "border-border hover:border-border-hover bg-background"}`}
+                onClick={() => setPurchaseTier("source")}
+              >
+                <div className="flex justify-between items-center mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${purchaseTier === "source" ? "border-primary" : "border-muted-foreground"}`}>
+                      {purchaseTier === "source" && <div className="w-2 h-2 bg-primary rounded-full" />}
+                    </div>
+                    <span className="font-bold">Source Code Only</span>
+                  </div>
+                  <span className="text-xl font-mono font-bold text-foreground">${PRODUCT.price.toFixed(2)}</span>
+                </div>
+                <p className="text-xs text-muted-foreground pl-6">One-time payment. Download the code and host it yourself.</p>
               </div>
-              <p className="text-xs text-muted-foreground">Includes 6 months of support and updates.</p>
+
+              {/* Managed Hosting Option */}
+              {PRODUCT.hasManagedHosting && (
+                <div 
+                  className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${purchaseTier === "managed" ? "border-primary bg-primary/5" : "border-border hover:border-border-hover bg-background"}`}
+                  onClick={() => setPurchaseTier("managed")}
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    <div className="flex items-center gap-2">
+                      <div className={`w-4 h-4 rounded-full border flex items-center justify-center ${purchaseTier === "managed" ? "border-primary" : "border-muted-foreground"}`}>
+                        {purchaseTier === "managed" && <div className="w-2 h-2 bg-primary rounded-full" />}
+                      </div>
+                      <span className="font-bold">Managed Setup & Hosting</span>
+                    </div>
+                  </div>
+                  <p className="text-xs text-muted-foreground pl-6 mb-3">Base price ${PRODUCT.price.toFixed(2)} + recurring hosting fee. Seller handles setup and server maintenance.</p>
+                  
+                  {purchaseTier === "managed" && (
+                    <div className="pl-6 pt-3 border-t border-border/50">
+                      <div className="flex items-center gap-2 bg-secondary/50 p-1 rounded-lg w-fit mb-3">
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setHostingBilling("monthly"); }}
+                          className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${hostingBilling === "monthly" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground"}`}
+                        >
+                          Monthly
+                        </button>
+                        <button 
+                          onClick={(e) => { e.stopPropagation(); setHostingBilling("yearly"); }}
+                          className={`px-3 py-1 text-xs font-medium rounded-md transition-colors ${hostingBilling === "yearly" ? "bg-background shadow-sm text-foreground" : "text-muted-foreground"}`}
+                        >
+                          Yearly (Save 15%)
+                        </button>
+                      </div>
+                      <div className="flex items-end gap-2">
+                        <span className="text-2xl font-mono font-bold text-primary">
+                          ${hostingBilling === "monthly" ? PRODUCT.hostingPriceMonthly?.toFixed(2) : PRODUCT.hostingPriceYearly?.toFixed(2)}
+                        </span>
+                        <span className="text-sm text-muted-foreground mb-1">/ {hostingBilling === "monthly" ? "month" : "year"}</span>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
             </div>
 
             <div className="space-y-3">
               <Button onClick={handleBuyNow} size="lg" className="w-full text-primary-foreground font-semibold h-12 text-base">
-                Buy Now
+                {purchaseTier === "source" ? "Buy Source Code" : "Buy & Subscribe to Hosting"}
               </Button>
               <Button onClick={handleChat} variant="outline" size="lg" className="w-full font-semibold h-12 text-base border border-border hover:border-primary hover:text-primary transition-colors text-foreground bg-transparent">
                 Chat to Customize

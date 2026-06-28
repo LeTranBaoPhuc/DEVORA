@@ -14,6 +14,7 @@ const STEPS = ["Basic Info", "Media", "Files & Tech", "Pricing", "Review"];
 
 export default function CreateProductPage() {
   const [currentStep, setCurrentStep] = useState(0);
+  const [offerManagedHosting, setOfferManagedHosting] = useState(false);
 
   const renderStepContent = () => {
     switch (currentStep) {
@@ -129,6 +130,35 @@ export default function CreateProductPage() {
                   <SelectItem value="resale">Resale Rights</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="p-4 bg-secondary/50 rounded-lg border border-border space-y-4">
+              <div className="flex items-center space-x-2">
+                <Checkbox 
+                  id="managed_hosting" 
+                  checked={offerManagedHosting} 
+                  onCheckedChange={(checked) => setOfferManagedHosting(checked as boolean)} 
+                />
+                <label htmlFor="managed_hosting" className="text-sm font-bold text-primary leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer">
+                  Offer Managed Setup & Hosting?
+                </label>
+              </div>
+              <p className="text-xs text-muted-foreground pl-6">
+                If enabled, buyers can choose between downloading the source code or paying you a recurring fee to set up and host the application for them.
+              </p>
+              
+              {offerManagedHosting && (
+                <div className="pl-6 pt-2 grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium">Monthly Hosting Fee (USD)</label>
+                    <Input type="number" placeholder="e.g. 15.00" className="bg-background font-mono h-9" />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-xs font-medium">Yearly Hosting Fee (USD) - Optional</label>
+                    <Input type="number" placeholder="e.g. 150.00" className="bg-background font-mono h-9" />
+                  </div>
+                </div>
+              )}
             </div>
             <div className="p-4 bg-secondary/50 rounded-lg border border-border space-y-4">
               <div className="flex items-center space-x-2">
