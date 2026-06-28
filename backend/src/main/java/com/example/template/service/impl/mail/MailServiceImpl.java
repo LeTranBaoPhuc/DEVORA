@@ -43,7 +43,7 @@ public class MailServiceImpl implements MailService {
             properties.put("verifyCode", verifyCode);
             context.setVariables(properties);
 
-            helper.setFrom(emailFrom, "Template Service");
+            helper.setFrom(emailFrom, "DEVORA");
             helper.setTo(emailTo);
             helper.setSubject("Xác nhận tài khoản");
             String html = templateEngine.process(template, context);
@@ -70,7 +70,7 @@ public class MailServiceImpl implements MailService {
             properties.put("resetPasswordToken", resetPasswordToken);
             context.setVariables(properties);
 
-            helper.setFrom(emailFrom, "Template Service");
+            helper.setFrom(emailFrom, "DEVORA");
             helper.setTo(emailTo);
             helper.setSubject("Đặt lại mật khẩu");
             String html = templateEngine.process("email-reset-password.html", context);
@@ -91,7 +91,7 @@ public class MailServiceImpl implements MailService {
             Context context = new Context();
             context.setVariable("otp", otp);
 
-            helper.setFrom(emailFrom, "Template Service");
+            helper.setFrom(emailFrom, "DEVORA");
             helper.setTo(emailTo);
             helper.setSubject("Mã xác thực OTP");
 
