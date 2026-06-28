@@ -4,11 +4,12 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
-import { Star, Download, Heart, ShieldCheck, Share2, Check, ExternalLink } from "lucide-react";
+import { Star, Download, Heart, ShieldCheck, Share2, Check, ExternalLink, ShoppingCart, ChevronRight, CheckCircle2, Copy, MessageSquare, Play, Globe, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Dialog, DialogContent, DialogTrigger, DialogClose } from "@/components/ui/dialog";
 import { Separator } from "@/components/ui/separator";
 import { Breadcrumb, BreadcrumbItem, BreadcrumbLink, BreadcrumbList, BreadcrumbPage, BreadcrumbSeparator } from "@/components/ui/breadcrumb";
 import { ProductCard } from "@/components/marketplace/product-card";
@@ -21,6 +22,7 @@ const PRODUCT = {
   version: "2.1.4",
   lastUpdated: "Oct 24, 2025",
   compatiblePlatforms: ["iOS", "Android", "Web"],
+  demoUrl: "https://example.com",
   images: [
     "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&q=80&w=1200",
     "https://images.unsplash.com/photo-1555774698-0b77e0d5fac6?auto=format&fit=crop&q=80&w=1200",
@@ -120,9 +122,47 @@ export default function ProductDetailPage() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
         {/* Left Column: Image Gallery */}
         <div className="lg:col-span-2 space-y-4">
-          <div className="aspect-[16/9] bg-secondary rounded-xl overflow-hidden border border-border relative">
-            <img src={PRODUCT.images[activeImage]} alt={PRODUCT.title} className="w-full h-full object-cover" />
-            <Badge className="absolute top-4 left-4 bg-background/80 backdrop-blur text-foreground border-none">
+          <div className="aspect-[16/9] bg-secondary rounded-xl overflow-hidden border border-border relative group">
+            <img src={PRODUCT.images[activeImage]} alt={PRODUCT.title} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
+            
+            <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button size="lg" className="rounded-full gap-2 shadow-xl font-semibold bg-primary hover:bg-primary/90 text-primary-foreground border-none">
+                    <Play className="w-5 h-5 fill-current" /> Live Preview
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="max-w-6xl w-[95vw] h-[90vh] p-0 border-none bg-black overflow-hidden flex flex-col sm:rounded-xl">
+                  <div className="h-14 bg-zinc-900 flex items-center justify-between px-6 text-white border-b border-zinc-800 shrink-0">
+                    <div className="flex items-center gap-3">
+                      <Globe className="w-5 h-5 text-zinc-400" />
+                      <span className="font-medium text-zinc-100">{PRODUCT.title} - Live Demo</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800" asChild>
+                        <a href={PRODUCT.demoUrl} target="_blank" rel="noopener noreferrer" title="Open in new tab">
+                          <ExternalLink className="w-4 h-4" />
+                        </a>
+                      </Button>
+                      <DialogClose asChild>
+                        <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800">
+                          <X className="w-5 h-5" />
+                        </Button>
+                      </DialogClose>
+                    </div>
+                  </div>
+                  <div className="flex-1 w-full bg-zinc-950 relative">
+                    {/* Skeleton loader for iframe */}
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="w-8 h-8 border-4 border-zinc-800 border-t-primary rounded-full animate-spin"></div>
+                    </div>
+                    <iframe src={PRODUCT.demoUrl} className="w-full h-full border-none relative z-10 bg-white" allow="fullscreen" />
+                  </div>
+                </DialogContent>
+              </Dialog>
+            </div>
+
+            <Badge className="absolute top-4 left-4 bg-background/90 backdrop-blur-md text-foreground border-none shadow-sm font-medium px-3 py-1">
               {PRODUCT.productType}
             </Badge>
           </div>
