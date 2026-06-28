@@ -126,35 +126,46 @@ export function TopNav() {
                       <AvatarFallback>{user.username.slice(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                   </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end" className="w-56 mt-1">
+                  <DropdownMenuContent align="end" className="w-64 mt-1">
                     <DropdownMenuGroup>
-                      <DropdownMenuLabel className="font-normal">
-                        <div className="flex flex-col space-y-1">
-                          <p className="text-sm font-medium leading-none">{user.username}</p>
-                          <p className="text-xs leading-none text-muted-foreground">{user.email}</p>
+                      <div className="flex items-center gap-3 p-2">
+                        <Avatar className="h-10 w-10">
+                          <AvatarImage src={user.avatarUrl} />
+                          <AvatarFallback>{user.username.slice(0, 2).toUpperCase()}</AvatarFallback>
+                        </Avatar>
+                        <div className="flex flex-col space-y-0.5">
+                          <p className="text-sm font-semibold leading-none">{user.username}</p>
+                          {user.email !== user.username && (
+                            <p className="text-xs text-muted-foreground truncate w-[160px]">{user.email}</p>
+                          )}
                         </div>
-                      </DropdownMenuLabel>
+                      </div>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem>
-                      <Link href="/dashboard/buyer" className="cursor-pointer w-full">My Dashboard</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/dashboard/buyer/orders" className="cursor-pointer w-full">My Purchases</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/dashboard/seller/orders" className="cursor-pointer w-full text-info hover:text-info/80 font-medium">My Sales</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/dashboard/seller" className="cursor-pointer w-full text-primary hover:text-primary/80 font-medium">Seller Dashboard</Link>
-                    </DropdownMenuItem>
-                    <DropdownMenuItem>
-                      <Link href="/settings" className="cursor-pointer w-full">Cài đặt tài khoản</Link>
-                    </DropdownMenuItem>
+                    <DropdownMenuGroup>
+                      <DropdownMenuLabel className="text-xs uppercase text-muted-foreground tracking-wider py-1.5">Buying</DropdownMenuLabel>
+                      <DropdownMenuItem asChild>
+                        <Link href="/dashboard/buyer" className="cursor-pointer w-full text-sm font-medium">My Dashboard</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem asChild>
+                        <Link href="/dashboard/buyer/orders" className="cursor-pointer w-full text-sm font-medium">My Purchases</Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
                     <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={() => { logout(); toast.success("Logged out successfully"); }} className="text-destructive cursor-pointer focus:text-destructive">
-                      Log out
-                    </DropdownMenuItem>
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem asChild>
+                        <Link href="/dashboard/seller" className="cursor-pointer w-full text-sm font-medium text-primary focus:text-primary focus:bg-primary/10">Truy cập trang người bán</Link>
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuItem asChild>
+                        <Link href="/settings" className="cursor-pointer w-full text-sm font-medium">Account Settings</Link>
+                      </DropdownMenuItem>
+                      <DropdownMenuItem onClick={() => { logout(); toast.success("Logged out successfully"); }} className="text-destructive cursor-pointer focus:text-destructive text-sm font-medium">
+                        Log out
+                      </DropdownMenuItem>
+                    </DropdownMenuGroup>
                   </DropdownMenuContent>
                 </DropdownMenu>
               </>
