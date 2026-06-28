@@ -122,7 +122,7 @@ export function TopNav() {
                 <DropdownMenu>
                   <DropdownMenuTrigger className="p-0 border-none bg-transparent hover:bg-transparent cursor-pointer rounded-full outline-none ml-2">
                     <Avatar className="h-9 w-9 border-2 border-border hover:border-primary transition-all">
-                      <AvatarImage src={user.avatar} />
+                      <AvatarImage src={user.avatarUrl} />
                       <AvatarFallback>{user.username.slice(0, 2).toUpperCase()}</AvatarFallback>
                     </Avatar>
                   </DropdownMenuTrigger>

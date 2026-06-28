@@ -38,6 +38,13 @@ export default function SettingsPage() {
   const [isVerifyingOtp, setIsVerifyingOtp] = useState(false);
   const [showOtpInput, setShowOtpInput] = useState(false);
 
+  // KYC state
+  const [isUploadingID, setIsUploadingID] = useState(false);
+  const [idUploaded, setIdUploaded] = useState(false);
+  const [isScanningFace, setIsScanningFace] = useState(false);
+  const [faceScanned, setFaceScanned] = useState(false);
+  const [kycSubmitted, setKycSubmitted] = useState(false);
+
   useEffect(() => {
     if (user) {
       setFirstName(user.firstName || "");
