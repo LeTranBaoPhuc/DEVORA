@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { toast } from "sonner";
-import { Search, Bell, Menu, MessageSquare, ChevronDown, Sun, Moon } from "lucide-react";
+import { Search, Bell, Menu, MessageSquare, ChevronDown, Sun, Moon, ShoppingCart } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -108,6 +108,11 @@ export function TopNav() {
             ) : (
               <>
                 <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground rounded-full" asChild>
+                  <Link href="/cart">
+                    <ShoppingCart className="h-5 w-5" />
+                  </Link>
+                </Button>
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground rounded-full" asChild>
                   <Link href="/messages">
                     <MessageSquare className="h-5 w-5" />
                   </Link>
@@ -143,7 +148,6 @@ export function TopNav() {
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                      <DropdownMenuLabel className="text-xs uppercase text-muted-foreground tracking-wider py-1.5">Buying</DropdownMenuLabel>
                       <DropdownMenuItem asChild>
                         <Link href="/dashboard/buyer" className="cursor-pointer w-full text-sm font-medium">My Dashboard</Link>
                       </DropdownMenuItem>
