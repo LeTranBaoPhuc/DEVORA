@@ -170,6 +170,10 @@ export default function SettingsPage() {
     toast.info("Opening 2FA setup wizard...");
   };
 
+  const handleAvatarRemove = () => {
+    toast.success("Avatar removed");
+  };
+
   const handleSaveNotifications = () => {
     toast.success("Notification preferences saved");
   };
