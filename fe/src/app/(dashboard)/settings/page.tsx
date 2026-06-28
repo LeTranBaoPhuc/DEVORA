@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
-import { Save, ShieldAlert, UploadCloud, Camera, CheckCircle2 } from "lucide-react";
+import { Save, ShieldAlert, UploadCloud, Camera, CheckCircle2, Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -30,6 +30,9 @@ export default function SettingsPage() {
   const [newPassword, setNewPassword] = useState("");
   const [confirmNewPassword, setConfirmNewPassword] = useState("");
   const [isChangingPassword, setIsChangingPassword] = useState(false);
+  const [showOldPassword, setShowOldPassword] = useState(false);
+  const [showNewPassword, setShowNewPassword] = useState(false);
+  const [showConfirmNewPassword, setShowConfirmNewPassword] = useState(false);
 
   // Email OTP state
   const [newEmail, setNewEmail] = useState("");
@@ -337,15 +340,42 @@ export default function SettingsPage() {
             <CardContent className="space-y-4">
               <div className="space-y-2 max-w-md">
                 <label className="text-sm font-medium">Mật khẩu hiện tại</label>
-                <Input type="password" value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="••••••••" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+                <div className="relative">
+                  <Input type={showOldPassword ? "text" : "password"} value={oldPassword} onChange={(e) => setOldPassword(e.target.value)} placeholder="••••••••" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors pr-10" />
+                  <button
+                    type="button"
+                    onClick={() => setShowOldPassword(!showOldPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showOldPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
               <div className="space-y-2 max-w-md">
                 <label className="text-sm font-medium">Mật khẩu mới</label>
-                <Input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+                <div className="relative">
+                  <Input type={showNewPassword ? "text" : "password"} value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="••••••••" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors pr-10" />
+                  <button
+                    type="button"
+                    onClick={() => setShowNewPassword(!showNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
               <div className="space-y-2 max-w-md">
                 <label className="text-sm font-medium">Xác nhận mật khẩu mới</label>
-                <Input type="password" value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} placeholder="••••••••" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+                <div className="relative">
+                  <Input type={showConfirmNewPassword ? "text" : "password"} value={confirmNewPassword} onChange={(e) => setConfirmNewPassword(e.target.value)} placeholder="••••••••" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors pr-10" />
+                  <button
+                    type="button"
+                    onClick={() => setShowConfirmNewPassword(!showConfirmNewPassword)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+                  >
+                    {showConfirmNewPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                  </button>
+                </div>
               </div>
               <Button onClick={handleChangePassword} disabled={isChangingPassword} className="mt-2 font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
                 {isChangingPassword ? "Đang xử lý..." : "Cập nhật mật khẩu"}
