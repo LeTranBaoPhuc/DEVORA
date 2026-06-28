@@ -94,12 +94,37 @@ export function TopNav() {
                     <MessageSquare className="h-5 w-5" />
                   </Link>
                 </Button>
-                <Button variant="ghost" size="icon" className="relative rounded-full text-muted-foreground hover:text-foreground" asChild>
-                  <Link href="/notifications">
-                    <Bell className="h-5 w-5" />
-                    <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full shadow-[0_0_5px_rgba(204,255,0,0.5)]"></span>
-                  </Link>
-                </Button>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="ghost" size="icon" className="relative rounded-full text-muted-foreground hover:text-foreground">
+                      <Bell className="h-5 w-5" />
+                      <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full shadow-[0_0_5px_rgba(204,255,0,0.5)]"></span>
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-80">
+                    <div className="flex items-center justify-between px-4 py-2 border-b border-border">
+                      <span className="font-semibold text-sm">Thông báo</span>
+                      <Link href="/notifications" className="text-xs text-primary hover:underline">Mở rộng</Link>
+                    </div>
+                    <div className="py-2 px-1 max-h-80 overflow-y-auto">
+                      <div className="px-3 py-2 hover:bg-secondary/50 rounded-md cursor-pointer mb-1 transition-colors">
+                        <p className="text-sm font-medium text-foreground">Đơn hàng mới #1234</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Bạn có 1 đơn hàng mới từ John Doe</p>
+                        <p className="text-[10px] text-muted-foreground mt-1.5 font-medium">2 phút trước</p>
+                      </div>
+                      <div className="px-3 py-2 hover:bg-secondary/50 rounded-md cursor-pointer mb-1 transition-colors">
+                        <p className="text-sm font-medium text-foreground">Đánh giá sản phẩm</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Sản phẩm "Web Template" vừa nhận đánh giá 5 sao</p>
+                        <p className="text-[10px] text-muted-foreground mt-1.5 font-medium">1 giờ trước</p>
+                      </div>
+                      <div className="px-3 py-2 hover:bg-secondary/50 rounded-md cursor-pointer transition-colors">
+                        <p className="text-sm font-medium text-foreground">Hệ thống</p>
+                        <p className="text-xs text-muted-foreground mt-0.5">Yêu cầu rút tiền $500 đã hoàn tất</p>
+                        <p className="text-[10px] text-muted-foreground mt-1.5 font-medium">1 ngày trước</p>
+                      </div>
+                    </div>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
                 <DropdownMenu>
                   <DropdownMenuTrigger className="p-0 border-none bg-transparent hover:bg-transparent cursor-pointer rounded-full outline-none ml-2">
