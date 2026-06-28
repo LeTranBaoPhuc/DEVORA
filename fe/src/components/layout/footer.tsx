@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { MessageSquare, Bot, Globe, Twitter, Github } from "lucide-react";
+import { MessageSquare, Bot, Globe } from "lucide-react";
 
 export function Footer() {
   return (
@@ -14,10 +14,10 @@ export function Footer() {
             </p>
             <div className="flex gap-4">
               <Link href="https://twitter.com" className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
-                <Twitter className="w-4 h-4" />
+                <Globe className="w-4 h-4" />
               </Link>
               <Link href="https://github.com" className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
-                <Github className="w-4 h-4" />
+                <Bot className="w-4 h-4" />
               </Link>
               <Link href="https://discord.com" className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center text-muted-foreground hover:bg-primary hover:text-primary-foreground transition-colors">
                 <MessageSquare className="w-4 h-4" />
