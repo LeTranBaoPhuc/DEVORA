@@ -46,9 +46,6 @@ export default function DashboardLayout({
               <Link href="/settings" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-colors">
                 <Settings className="w-4 h-4" /> Account Settings
               </Link>
-              <Link href="/messages" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-colors">
-                <MessageSquare className="w-4 h-4" /> Messages
-              </Link>
               <LogoutSidebarButton />
             </nav>
           </div>
