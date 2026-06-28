@@ -102,6 +102,7 @@ public class MailServiceImpl implements MailService {
             log.info("OTP email sent successfully to {}", emailTo);
         } catch (Exception e) {
             log.error("Failed to send OTP email to {}: {}", emailTo, e.getMessage());
+            throw new RuntimeException("Failed to send email OTP: " + e.getMessage());
         }
     }
 }

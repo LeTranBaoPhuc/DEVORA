@@ -31,6 +31,8 @@ public interface UserRepository extends JpaRepository<User, Long> {
 
     Optional<User> findByVerificationCode(String verificationCode);
 
+    Optional<User> findByEmailAndVerificationCode(String email, String verificationCode);
+
     @Query("""
         SELECT DISTINCT u
         FROM User u

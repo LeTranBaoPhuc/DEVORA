@@ -14,11 +14,11 @@ public interface AuthenticationService {
 
     void logout(HttpServletRequest request);
 
-    Long register(RegisterRequest request);
+    void register(RegisterRequest request);
 
     void forgotPassword(ForgotPasswordRequest request);
 
-    boolean confirmRegister(String verifyCode);
+    boolean confirmRegister(String email, String verifyCode);
 
     void verifyResetPasswordToken(String token);
 

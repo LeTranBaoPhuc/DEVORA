@@ -58,6 +58,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final PasswordEncoder passwordEncoder;
     private final TokenService tokenService;
 
+    private final Map<String, PendingRegistration> pendingRegistrations = new java.util.concurrent.ConcurrentHashMap<>();
+
     @Value("${google.client-id}")
     private String googleClientId;
 
@@ -157,8 +159,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    @Transactional(rollbackFor = Exception.class)
-    public Long register(RegisterRequest request) {
+    public void register(RegisterRequest request) {
         log.info("Processing register for user: {}", request.getUsername());
 
         if (!request.getPassword().equals(request.getConfirmPassword())) {
@@ -177,29 +178,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new InvalidDataException("auth.phone_exists");
         }
 
-        String randomCode = UUID.randomUUID().toString();
+        String randomCode = String.format("%06d", new java.util.Random().nextInt(999999));
 
-        User user = new User();
-        user.setUsername(request.getUsername());
-        user.setEmail(request.getEmail());
-        user.setPassword(passwordEncoder.encode(request.getPassword()));
-        user.setGender(request.getGender());
-        user.setDateOfBirth(request.getBirthday());
-        user.setPhone(request.getPhone());
-        user.setFirstName(request.getFirstName());
-        user.setLastName(request.getLastName());
-        user.setVerificationCode(randomCode);
-        user.setVerificationExpiration(LocalDateTime.now().plusMinutes(5));
-        user.setStatus(EUserStatus.INACTIVE);
+        PendingRegistration pendingRegistration = PendingRegistration.builder()
+                .request(request)
+                .otpCode(randomCode)
+                .expirationTime(LocalDateTime.now().plusMinutes(5))
+                .build();
+        
+        pendingRegistrations.put(request.getEmail(), pendingRegistration);
 
-        mailService.sendConfirmLink(request.getEmail(), "email-confirmation-register.html", endPointConfirmUser,
-                randomCode);
+        mailService.sendOtpEmail(request.getEmail(), randomCode);
 
-        userRepository.save(user);
-
-        log.info("User {} has been registered", user.getUsername());
-
-        return user.getId();
+        log.info("OTP has been sent for registration of user: {}", request.getUsername());
     }
 
     @Override
@@ -220,27 +211,51 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    public boolean confirmRegister(String verifyCode) {
-        log.info("Processing verify code for register");
+    @Transactional(rollbackFor = Exception.class)
+    public boolean confirmRegister(String email, String verifyCode) {
+        log.info("Processing verify code for register for email: {}", email);
 
-        User user = userRepository.findByVerificationCode(verifyCode)
-                .orElseThrow(() -> new ResourceNotFoundException("auth.user_not_found_by_verification_code"));
-
-        if (LocalDateTime.now().isAfter(user.getVerificationExpiration())) {
-            log.error("Verification code expired for user {}", user.getUsername());
-            return false;
+        PendingRegistration pendingRegistration = pendingRegistrations.get(email);
+        if (pendingRegistration == null) {
+            throw new ResourceNotFoundException("auth.pending_registration_not_found");
         }
 
+        if (!pendingRegistration.getOtpCode().equals(verifyCode)) {
+            throw new InvalidDataException("auth.invalid_verification_code");
+        }
+
+        if (LocalDateTime.now().isAfter(pendingRegistration.getExpirationTime())) {
+            pendingRegistrations.remove(email);
+            log.error("Verification code expired for email {}", email);
+            throw new InvalidDataException("auth.verification_code_expired");
+        }
+
+        RegisterRequest request = pendingRegistration.getRequest();
+
+        // Double check existence in case it was created concurrently
+        if (userRepository.existsByUsername(request.getUsername()) || userRepository.existsByEmail(request.getEmail())) {
+            pendingRegistrations.remove(email);
+            throw new InvalidDataException("auth.user_already_exists");
+        }
+
+        User user = new User();
+        user.setUsername(request.getUsername());
+        user.setEmail(request.getEmail());
+        user.setPassword(passwordEncoder.encode(request.getPassword()));
+        user.setGender(request.getGender());
+        user.setDateOfBirth(request.getBirthday());
+        user.setPhone(request.getPhone());
+        user.setFirstName(request.getFirstName());
+        user.setLastName(request.getLastName());
         user.setStatus(EUserStatus.ACTIVE);
-        user.setVerificationCode(null);
-        user.setVerificationExpiration(null);
 
         Role role = roleRepository.findByName(ERole.USER);
         user.setRoles(new HashSet<>(List.of(role)));
 
         userRepository.save(user);
+        pendingRegistrations.remove(email);
 
-        log.info("User {} has been verified", user.getUsername());
+        log.info("User {} has been verified and saved to database", user.getUsername());
         return true;
     }
 

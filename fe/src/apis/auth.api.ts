@@ -24,7 +24,7 @@ export const authApi = {
     });
   },
 
-  verifyRegister: (verifyCode: string) => http<any>(`/api/auth/verify-register?verifyCode=${verifyCode}`, {
+  verifyRegister: (email: string, verifyCode: string) => http<any>(`/api/auth/verify-register?email=${encodeURIComponent(email)}&verifyCode=${encodeURIComponent(verifyCode)}`, {
     method: 'POST',
   }),
 

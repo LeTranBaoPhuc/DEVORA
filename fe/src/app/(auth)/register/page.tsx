@@ -11,9 +11,13 @@ import { ROUTES } from "@/routes";
 import { toast } from "sonner";
 
 export default function RegisterPage() {
-  const { register } = useAuth();
+  const { register, verifyRegister } = useAuth();
   const router = useRouter();
   
+  const [showOtpScreen, setShowOtpScreen] = useState(false);
+  const [otp, setOtp] = useState("");
+  const [isVerifying, setIsVerifying] = useState(false);
+
   const [formData, setFormData] = useState({
     firstName: "",
     lastName: "",
@@ -42,9 +46,53 @@ export default function RegisterPage() {
     setIsSubmitting(false);
 
     if (success) {
+      setShowOtpScreen(true);
+    }
+  };
+
+  const handleVerifyOtp = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otp) {
+      toast.error("Please enter the OTP");
+      return;
+    }
+
+    setIsVerifying(true);
+    const success = await verifyRegister(formData.email, otp);
+    setIsVerifying(false);
+
+    if (success) {
       router.push(ROUTES.LOGIN);
     }
   };
+
+  if (showOtpScreen) {
+    return (
+      <>
+        <div className="mb-8 text-center sm:text-left">
+          <h2 className="text-3xl font-heading font-bold mb-2">Verify your email</h2>
+          <p className="text-muted-foreground">We sent a 6-digit code to <span className="font-semibold text-foreground">{formData.email}</span></p>
+        </div>
+        <form className="space-y-5" onSubmit={handleVerifyOtp}>
+          <div className="space-y-2">
+            <label className="text-sm font-medium text-foreground">OTP Code</label>
+            <Input 
+              value={otp} 
+              onChange={(e) => setOtp(e.target.value)} 
+              type="text" 
+              placeholder="••••••" 
+              required 
+              className="h-12 text-center text-2xl tracking-[0.5em] bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" 
+              maxLength={6}
+            />
+          </div>
+          <Button type="submit" disabled={isVerifying} className="w-full h-12 font-bold text-base mt-4 bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
+            {isVerifying ? "Verifying..." : "Verify Account"}
+          </Button>
+        </form>
+      </>
+    );
+  }
 
   return (
     <>

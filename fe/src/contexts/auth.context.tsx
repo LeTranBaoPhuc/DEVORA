@@ -12,6 +12,7 @@ type AuthContextType = {
   login: (email: string, password: string) => Promise<boolean>;
   loginWithGoogle: (token: string) => Promise<boolean>;
   register: (data: any) => Promise<boolean>;
+  verifyRegister: (email: string, otp: string) => Promise<boolean>;
   logout: () => void;
   refreshProfile: () => Promise<void>;
   isLoading: boolean;
@@ -99,6 +100,21 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
+  const verifyRegister = async (email: string, otp: string): Promise<boolean> => {
+    try {
+      const response = await authApi.verifyRegister(email, otp);
+      if (response && response.status === 200) {
+        toast.success(response.message || "Email verified successfully");
+        return true;
+      }
+      return false;
+    } catch (error: any) {
+      console.error("Verify register error", error);
+      toast.error(error.message || "Verification failed");
+      return false;
+    }
+  };
+
   const logout = async () => {
     try {
       const refreshToken = localStorage.getItem("refreshToken");
@@ -115,7 +131,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <AuthContext.Provider value={{ user, login, loginWithGoogle, register, logout, refreshProfile: fetchProfile, isLoading }}>
+    <AuthContext.Provider value={{ user, login, loginWithGoogle, register, verifyRegister, logout, refreshProfile: fetchProfile, isLoading }}>
       {children}
     </AuthContext.Provider>
   );
