@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { toast } from "sonner";
-import { Search, Bell, Menu, MessageSquare, ChevronDown, Sun, Moon, ShoppingCart } from "lucide-react";
+import { Search, Bell, Menu, MessageSquare, ChevronDown, Sun, Moon, ShoppingCart, Globe } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -18,6 +18,9 @@ import {
   DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
+  DropdownMenuSub,
+  DropdownMenuSubContent,
+  DropdownMenuSubTrigger,
 } from "@/components/ui/dropdown-menu";
 
 export function TopNav() {
@@ -67,32 +70,6 @@ export function TopNav() {
 
           {/* Right Actions */}
           <div className="flex items-center gap-2 md:gap-4 shrink-0">
-            {/* Language Switcher */}
-            {mounted && (
-              <Button
-                variant="ghost"
-                size="sm"
-                className="font-bold text-muted-foreground hover:text-foreground"
-                onClick={() => {
-                  setLang(lang === "EN" ? "VI" : "EN");
-                  toast.success(lang === "EN" ? "Đã chuyển sang Tiếng Việt" : "Language changed to English");
-                }}
-              >
-                {lang}
-              </Button>
-            )}
-
-            {/* Theme Toggler */}
-            {mounted && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-muted-foreground hover:text-foreground rounded-full"
-                onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-              >
-                {theme === "dark" ? <Sun className="h-5 w-5" /> : <Moon className="h-5 w-5" />}
-              </Button>
-            )}
 
             {!user ? (
               <div className="flex items-center gap-2 ml-2">
@@ -145,6 +122,31 @@ export function TopNav() {
                           )}
                         </div>
                       </div>
+                    </DropdownMenuGroup>
+                    <DropdownMenuSeparator />
+                    <DropdownMenuGroup>
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger className="cursor-pointer text-sm font-medium flex items-center gap-2">
+                          {theme === "dark" ? <Moon className="w-4 h-4" /> : <Sun className="w-4 h-4" />} Theme
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                          <DropdownMenuItem onClick={() => setTheme("light")} className="cursor-pointer">Light</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setTheme("dark")} className="cursor-pointer">Dark</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => setTheme("system")} className="cursor-pointer">System</DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
+                      <DropdownMenuSub>
+                        <DropdownMenuSubTrigger className="cursor-pointer text-sm font-medium flex items-center gap-2">
+                          <Globe className="w-4 h-4" /> Language ({lang})
+                        </DropdownMenuSubTrigger>
+                        <DropdownMenuSubContent>
+                          <DropdownMenuItem onClick={() => { setLang("EN"); toast.success("Language changed to English"); }} className="cursor-pointer">English</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { setLang("VI"); toast.success("Đã chuyển sang Tiếng Việt"); }} className="cursor-pointer">Tiếng Việt</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { setLang("JP"); toast.success("日本語に変更しました"); }} className="cursor-pointer">日本語 (Japanese)</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { setLang("KR"); toast.success("한국어로 변경되었습니다"); }} className="cursor-pointer">한국어 (Korean)</DropdownMenuItem>
+                          <DropdownMenuItem onClick={() => { setLang("FR"); toast.success("Langue changée en Français"); }} className="cursor-pointer">Français (French)</DropdownMenuItem>
+                        </DropdownMenuSubContent>
+                      </DropdownMenuSub>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
