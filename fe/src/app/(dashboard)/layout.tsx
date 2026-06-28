@@ -45,6 +45,9 @@ export default function DashboardLayout({
                   <Link href="/dashboard/seller" className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${pathname === '/dashboard/seller' ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'}`}>
                     <Wallet className={`w-4 h-4 ${pathname === '/dashboard/seller' ? 'text-primary' : ''}`} /> Earnings & Stats
                   </Link>
+                  <Link href="/dashboard/seller/orders" className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${pathname?.startsWith('/dashboard/seller/orders') ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'}`}>
+                    <ShoppingBag className={`w-4 h-4 ${pathname?.startsWith('/dashboard/seller/orders') ? 'text-primary' : ''}`} /> Orders
+                  </Link>
                   <Link href="/dashboard/seller/products" className={`flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md transition-colors ${pathname?.startsWith('/dashboard/seller/products') ? 'bg-secondary text-foreground' : 'text-muted-foreground hover:bg-secondary/50 hover:text-foreground'}`}>
                     <Package className={`w-4 h-4 ${pathname?.startsWith('/dashboard/seller/products') ? 'text-primary' : ''}`} /> My Products
                   </Link>
