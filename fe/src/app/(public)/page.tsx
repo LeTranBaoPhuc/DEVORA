@@ -128,11 +128,11 @@ export default function LandingPage() {
                 {t("hero.desc")}
               </p>
               <div className="flex gap-4">
-                <Button size="lg" className="h-14 px-10 text-lg font-bold bg-foreground text-background hover:bg-foreground/90 rounded-sm" asChild>
-                  <Link href="/marketplace">{t("hero.btn_browse")}</Link>
+                <Button size="lg" className="h-14 px-10 text-lg font-bold bg-foreground text-background hover:bg-foreground/90 rounded-sm" render={<Link href="/marketplace" />}>
+                  {t("hero.btn_browse")}
                 </Button>
-                <Button size="lg" variant="outline" className="h-14 px-10 text-lg font-bold bg-secondary/20 hover:bg-secondary/40 rounded-sm" asChild>
-                  <Link href="/auctions">{t("hero.btn_post")}</Link>
+                <Button size="lg" variant="outline" className="h-14 px-10 text-lg font-bold bg-secondary/20 hover:bg-secondary/40 rounded-sm" render={<Link href="/auctions" />}>
+                  {t("hero.btn_post")}
                 </Button>
               </div>
             </div>
