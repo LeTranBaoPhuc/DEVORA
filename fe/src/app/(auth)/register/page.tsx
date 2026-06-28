@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { Eye, EyeOff } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -11,12 +12,15 @@ import { ROUTES } from "@/routes";
 import { toast } from "sonner";
 
 export default function RegisterPage() {
-  const { register, verifyRegister } = useAuth();
+  const { register, verifyRegister, login } = useAuth();
   const router = useRouter();
   
   const [showOtpScreen, setShowOtpScreen] = useState(false);
   const [otp, setOtp] = useState("");
   const [isVerifying, setIsVerifying] = useState(false);
+  
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const [formData, setFormData] = useState({
     firstName: "",
@@ -62,7 +66,13 @@ export default function RegisterPage() {
     setIsVerifying(false);
 
     if (success) {
-      router.push(ROUTES.LOGIN);
+      // Auto login after successful verification
+      const loginSuccess = await login(formData.email, formData.password);
+      if (loginSuccess) {
+        router.push(ROUTES.HOME || "/");
+      } else {
+        router.push(ROUTES.LOGIN);
+      }
     }
   };
 
@@ -86,7 +96,7 @@ export default function RegisterPage() {
               maxLength={6}
             />
           </div>
-          <Button type="submit" disabled={isVerifying} className="w-full h-12 font-bold text-base mt-4 bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
+          <Button type="submit" disabled={isVerifying} className="w-full h-12 rounded-full font-bold text-base mt-4 bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
             {isVerifying ? "Verifying..." : "Verify Account"}
           </Button>
         </form>
@@ -131,11 +141,45 @@ export default function RegisterPage() {
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Password</label>
-            <Input name="password" value={formData.password} onChange={handleChange} type="password" placeholder="••••••••" required className="h-12 bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+            <div className="relative">
+              <Input 
+                name="password" 
+                value={formData.password} 
+                onChange={handleChange} 
+                type={showPassword ? "text" : "password"} 
+                placeholder="••••••••" 
+                required 
+                className="h-12 bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors pr-10" 
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword(!showPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
           <div className="space-y-2">
             <label className="text-sm font-medium text-foreground">Confirm Password</label>
-            <Input name="confirmPassword" value={formData.confirmPassword} onChange={handleChange} type="password" placeholder="••••••••" required className="h-12 bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+            <div className="relative">
+              <Input 
+                name="confirmPassword" 
+                value={formData.confirmPassword} 
+                onChange={handleChange} 
+                type={showConfirmPassword ? "text" : "password"} 
+                placeholder="••••••••" 
+                required 
+                className="h-12 bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors pr-10" 
+              />
+              <button
+                type="button"
+                onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+              >
+                {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -146,7 +190,7 @@ export default function RegisterPage() {
           </label>
         </div>
 
-        <Button type="submit" disabled={isSubmitting} className="w-full h-12 font-bold text-base mt-4 bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
+        <Button type="submit" disabled={isSubmitting} className="w-full h-12 rounded-full font-bold text-base mt-4 bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
           {isSubmitting ? "Creating Account..." : "Create Account"}
         </Button>
       </form>
