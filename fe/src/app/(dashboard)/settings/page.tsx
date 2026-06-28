@@ -1,6 +1,6 @@
 "use client";
 
-import { Save, ShieldAlert, UploadCloud } from "lucide-react";
+import { Save, ShieldAlert, UploadCloud, Camera } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -174,18 +174,34 @@ export default function SettingsPage() {
               <CardTitle className="flex items-center gap-2 text-primary drop-shadow-[0_0_5px_rgba(204,255,0,0.3)]">
                 <ShieldAlert className="w-5 h-5" /> KYC Verification Status: Pending
               </CardTitle>
-              <CardDescription>To sell products and withdraw funds, you must verify your identity.</CardDescription>
+              <CardDescription>To sell products and withdraw funds, you must verify your identity with a photo ID and a face scan.</CardDescription>
             </CardHeader>
             <CardContent className="pt-6 space-y-6">
-              <div className="p-4 bg-secondary/50 rounded-lg border border-border">
-                <h4 className="font-semibold mb-2 text-foreground">Upload ID Document</h4>
-                <p className="text-sm text-muted-foreground mb-4">Please upload a clear photo of your passport, driver&apos;s license, or national ID card.</p>
-                <div className="border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center justify-center bg-card hover:bg-secondary/50 hover:border-primary/50 transition-colors cursor-pointer text-center group">
-                  <UploadCloud className="w-8 h-8 text-muted-foreground mb-2 group-hover:text-primary transition-colors" />
-                  <p className="text-sm font-medium mb-1 group-hover:text-primary transition-colors">Upload Document</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-4 bg-secondary/50 rounded-lg border border-border">
+                  <h4 className="font-semibold mb-2 text-foreground">1. Upload ID Document</h4>
+                  <p className="text-sm text-muted-foreground mb-4">A clear photo of your passport, driver&apos;s license, or national ID card.</p>
+                  <div className="border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center justify-center bg-card hover:bg-secondary/50 hover:border-primary/50 transition-colors cursor-pointer text-center group h-40">
+                    <UploadCloud className="w-8 h-8 text-muted-foreground mb-2 group-hover:text-primary transition-colors" />
+                    <p className="text-sm font-medium mb-1 group-hover:text-primary transition-colors">Upload ID</p>
+                  </div>
+                </div>
+
+                <div className="p-4 bg-secondary/50 rounded-lg border border-border">
+                  <h4 className="font-semibold mb-2 text-foreground">2. Real-time Face Scan</h4>
+                  <p className="text-sm text-muted-foreground mb-4">Please grant camera permissions to capture a live selfie for liveness detection.</p>
+                  <div className="border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center justify-center bg-card hover:bg-secondary/50 hover:border-primary/50 transition-colors cursor-pointer text-center group h-40">
+                    <Camera className="w-8 h-8 text-muted-foreground mb-2 group-hover:text-primary transition-colors" />
+                    <p className="text-sm font-medium mb-1 group-hover:text-primary transition-colors">Start Camera Scan</p>
+                  </div>
                 </div>
               </div>
-              <Button className="w-full font-bold" disabled>Submit for Verification</Button>
+
+              <div className="pt-4 flex justify-end">
+                <Button className="font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
+                  Submit for Verification
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>

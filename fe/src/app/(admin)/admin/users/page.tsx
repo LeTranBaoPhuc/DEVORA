@@ -176,17 +176,31 @@ export default function AdminUsersPage() {
                         <span className="text-muted-foreground">Status:</span>
                         <span className="font-bold">{selectedUser.kyc}</span>
                       </div>
-                      <div className="flex justify-between text-sm">
-                        <span className="text-muted-foreground">Document Type:</span>
-                        <span>Passport</span>
-                      </div>
+                      
+                      {/* Visual KYC Mockup */}
+                      {selectedUser.kyc !== "N/A" && (
+                        <div className="grid grid-cols-2 gap-4 mt-2 mb-4">
+                          <div className="space-y-1 text-center">
+                            <span className="text-xs text-muted-foreground">ID Document</span>
+                            <div className="w-full aspect-[1.6/1] bg-secondary border border-border rounded flex items-center justify-center overflow-hidden">
+                              <img src="https://images.unsplash.com/photo-1633265486064-086b219458ce?w=400&q=80" alt="ID Document Mockup" className="w-full h-full object-cover blur-[2px] opacity-80" />
+                            </div>
+                          </div>
+                          <div className="space-y-1 text-center">
+                            <span className="text-xs text-muted-foreground">Face Scan (Selfie)</span>
+                            <div className="w-full aspect-[1.6/1] bg-secondary border border-border rounded flex items-center justify-center overflow-hidden">
+                              <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400&q=80" alt="Face Scan Mockup" className="w-full h-full object-cover opacity-90" />
+                            </div>
+                          </div>
+                        </div>
+                      )}
                       
                       {selectedUser.kyc === "Pending" && (
                         <div className="pt-3 border-t border-border flex gap-2">
-                          <Button size="sm" className="flex-1 bg-success hover:bg-success/90" onClick={() => handleKYC(selectedUser.id, "Approved")}>
+                          <Button size="sm" className="flex-1 bg-success hover:bg-success/90 text-white" onClick={() => handleKYC(selectedUser.id, "Approved")}>
                             <Check className="w-4 h-4 mr-1" /> Approve
                           </Button>
-                          <Button size="sm" className="flex-1 bg-danger hover:bg-danger/90" onClick={() => handleKYC(selectedUser.id, "Rejected")}>
+                          <Button size="sm" className="flex-1 bg-danger hover:bg-danger/90 text-white" onClick={() => handleKYC(selectedUser.id, "Rejected")}>
                             <X className="w-4 h-4 mr-1" /> Reject
                           </Button>
                         </div>
