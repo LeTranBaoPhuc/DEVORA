@@ -153,12 +153,8 @@ export function TopNav() {
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuGroup>
-                      <DropdownMenuLabel className="text-xs uppercase text-muted-foreground tracking-wider py-1.5">Selling</DropdownMenuLabel>
                       <DropdownMenuItem asChild>
-                        <Link href="/dashboard/seller" className="cursor-pointer w-full text-sm font-medium">Seller Dashboard</Link>
-                      </DropdownMenuItem>
-                      <DropdownMenuItem asChild>
-                        <Link href="/dashboard/seller/orders" className="cursor-pointer w-full text-sm font-medium">My Sales</Link>
+                        <Link href="/dashboard/seller" className="cursor-pointer w-full text-sm font-medium text-primary focus:text-primary focus:bg-primary/10">Truy cập trang người bán</Link>
                       </DropdownMenuItem>
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
