@@ -1,6 +1,8 @@
 "use client";
 
 import Link from "next/link";
+import { useState } from "react";
+import { toast } from "sonner";
 import { ArrowLeft, CheckCircle2, ChevronRight, Download, FileArchive, MessageSquare, ShieldAlert, ShieldCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -10,7 +12,7 @@ import { Separator } from "@/components/ui/separator";
 const PIPELINE_STATES = ["Pending", "Paid", "In Escrow", "Delivering", "Delivered", "Completed"];
 
 export default function OrderDetailPage() {
-  const currentStatus = "Delivered";
+  const [currentStatus, setCurrentStatus] = useState("Delivered");
   const currentStepIndex = PIPELINE_STATES.indexOf(currentStatus);
 
   return (
@@ -28,11 +30,11 @@ export default function OrderDetailPage() {
             <p className="text-muted-foreground">Placed on Oct 22, 2025 at 14:32 PM</p>
           </div>
           <div className="flex gap-3">
-            <Button variant="outline" className="text-danger hover:text-danger hover:bg-danger/10 border-danger/20">
+            <Button variant="outline" className="text-danger hover:text-danger hover:bg-danger/10 border-danger/20" onClick={() => toast.success("Dispute opened. Support team will contact you.")}>
               <ShieldAlert className="w-4 h-4 mr-2" /> Open Dispute
             </Button>
-            <Button variant="outline">
-              <MessageSquare className="w-4 h-4 mr-2" /> Contact Seller
+            <Button variant="outline" asChild>
+              <Link href="/messages"><MessageSquare className="w-4 h-4 mr-2" /> Contact Seller</Link>
             </Button>
           </div>
         </div>
@@ -95,14 +97,14 @@ export default function OrderDetailPage() {
                     <div className="text-sm font-medium">source_code_v1.zip</div>
                     <div className="text-xs text-muted-foreground">14.2 MB</div>
                   </div>
-                  <Button variant="ghost" size="icon"><Download className="w-4 h-4" /></Button>
+                  <Button variant="ghost" size="icon" onClick={() => toast.success("Download started: source_code_v1.zip")}><Download className="w-4 h-4" /></Button>
                 </div>
 
                 <div className="flex gap-3 justify-end pt-4 border-t border-border">
-                  <Button variant="outline" className="text-danger hover:text-danger hover:bg-danger/10 border-danger/20">
+                  <Button variant="outline" className="text-danger hover:text-danger hover:bg-danger/10 border-danger/20" onClick={() => toast.success("Revision requested. Seller has been notified.")}>
                     Request Revision
                   </Button>
-                  <Button className="bg-success hover:bg-success/90 text-white">
+                  <Button className="bg-success hover:bg-success/90 text-white" onClick={() => { setCurrentStatus("Completed"); toast.success("Delivery accepted! Escrow funds can now be released."); }}>
                     Accept Delivery
                   </Button>
                 </div>
@@ -154,11 +156,11 @@ export default function OrderDetailPage() {
                 <div className="font-mono text-2xl font-bold text-success">$29.99</div>
               </div>
 
-              <Button className="w-full font-semibold" disabled>
+              <Button className="w-full font-semibold" disabled={currentStatus !== "Completed"} onClick={() => toast.success("Funds released from Escrow successfully!")}>
                 Release Funds
               </Button>
               <p className="text-xs text-center text-muted-foreground mt-2">
-                Action requires accepting a delivery first.
+                {currentStatus !== "Completed" ? "Action requires accepting a delivery first." : "You can now release funds to the seller."}
               </p>
             </CardContent>
           </Card>

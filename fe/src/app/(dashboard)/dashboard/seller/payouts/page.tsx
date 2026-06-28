@@ -1,6 +1,7 @@
 "use client";
 
 import { Building2, CreditCard, Plus, Wallet } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
@@ -19,7 +20,7 @@ export default function PayoutsPage() {
           <CardContent className="p-6">
             <h3 className="font-medium opacity-90 mb-2 text-sm uppercase tracking-wider">Available for Payout</h3>
             <div className="text-4xl font-mono font-bold mb-6">$2,450.00</div>
-            <Button variant="secondary" className="w-full text-primary font-bold">
+            <Button variant="secondary" className="w-full text-primary font-bold" onClick={() => toast.success("Payout request submitted successfully!")}>
               Request Payout
             </Button>
             <p className="text-xs mt-3 opacity-80 text-center">Standard processing time: 2-3 business days</p>
@@ -29,7 +30,7 @@ export default function PayoutsPage() {
         <Card className="md:col-span-2 border-border bg-card">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
             <CardTitle className="text-lg">Bank Accounts</CardTitle>
-            <Button variant="outline" size="sm">
+            <Button variant="outline" size="sm" onClick={() => toast.info("Opening Add Bank Account dialog...")}>
               <Plus className="w-4 h-4 mr-2" /> Add Account
             </Button>
           </CardHeader>
@@ -45,7 +46,7 @@ export default function PayoutsPage() {
                     <div className="text-sm text-muted-foreground font-mono">•••• •••• •••• 4242</div>
                   </div>
                 </div>
-                <Button variant="ghost" size="sm">Edit</Button>
+                <Button variant="ghost" size="sm" onClick={() => toast.info("Editing account details...")}>Edit</Button>
               </div>
 
               <div className="flex items-center justify-between p-4 border border-border bg-card rounded-lg">
@@ -59,8 +60,8 @@ export default function PayoutsPage() {
                   </div>
                 </div>
                 <div className="flex gap-2">
-                  <Button variant="ghost" size="sm">Set Primary</Button>
-                  <Button variant="ghost" size="sm" className="text-danger">Remove</Button>
+                  <Button variant="ghost" size="sm" onClick={() => toast.success("Set as primary account")}>Set Primary</Button>
+                  <Button variant="ghost" size="sm" className="text-danger" onClick={() => toast.success("Account removed")}>Remove</Button>
                 </div>
               </div>
             </div>

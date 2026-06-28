@@ -1,6 +1,8 @@
 "use client";
 
-import { Save, ShieldAlert, UploadCloud } from "lucide-react";
+import { useState } from "react";
+import { Save, ShieldAlert, UploadCloud, Camera, CheckCircle2 } from "lucide-react";
+import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -10,6 +12,65 @@ import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Checkbox } from "@/components/ui/checkbox";
 
 export default function SettingsPage() {
+  const [isUploadingID, setIsUploadingID] = useState(false);
+  const [isScanningFace, setIsScanningFace] = useState(false);
+  const [idUploaded, setIdUploaded] = useState(false);
+  const [faceScanned, setFaceScanned] = useState(false);
+  const [kycSubmitted, setKycSubmitted] = useState(false);
+
+  const handleSaveProfile = () => {
+    toast.success("Profile updated successfully");
+  };
+
+  const handleUpdatePassword = () => {
+    toast.success("Password updated successfully");
+  };
+
+  const handleEnable2FA = () => {
+    toast.info("Opening 2FA setup wizard...");
+  };
+
+  const handleSaveNotifications = () => {
+    toast.success("Notification preferences saved");
+  };
+
+  const handleSaveSellerProfile = () => {
+    toast.success("Seller profile updated");
+  };
+
+  const handleUploadID = () => {
+    setIsUploadingID(true);
+    toast.loading("Uploading ID document...", { id: "upload-id" });
+    setTimeout(() => {
+      setIsUploadingID(false);
+      setIdUploaded(true);
+      toast.success("ID document uploaded successfully", { id: "upload-id" });
+    }, 1500);
+  };
+
+  const handleFaceScan = () => {
+    setIsScanningFace(true);
+    toast.loading("Initializing camera and scanning face...", { id: "face-scan" });
+    setTimeout(() => {
+      setIsScanningFace(false);
+      setFaceScanned(true);
+      toast.success("Face scan completed and verified", { id: "face-scan" });
+    }, 2000);
+  };
+
+  const handleSubmitKYC = () => {
+    setKycSubmitted(true);
+    toast.success("KYC information submitted for review. Please wait for admin approval.");
+  };
+
+  const handleAvatarChange = () => {
+    toast.info("Opening file picker for avatar...");
+  };
+
+  const handleAvatarRemove = () => {
+    toast.success("Avatar removed");
+  };
+
   return (
     <div className="space-y-8 max-w-5xl mx-auto pb-12 pt-8">
       <div>
@@ -40,8 +101,8 @@ export default function SettingsPage() {
                 </Avatar>
                 <div className="space-y-2">
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" className="hover:text-primary hover:border-primary transition-colors">Change Avatar</Button>
-                    <Button variant="ghost" size="sm" className="text-destructive hover:bg-destructive/10">Remove</Button>
+                    <Button variant="outline" size="sm" onClick={handleAvatarChange} className="hover:text-primary hover:border-primary transition-colors">Change Avatar</Button>
+                    <Button variant="ghost" size="sm" onClick={handleAvatarRemove} className="text-destructive hover:bg-destructive/10">Remove</Button>
                   </div>
                   <p className="text-xs text-muted-foreground">JPG, GIF or PNG. 1MB max.</p>
                 </div>
@@ -84,7 +145,7 @@ export default function SettingsPage() {
               </div>
 
               <div className="pt-4 flex justify-end">
-                <Button className="font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
+                <Button onClick={handleSaveProfile} className="font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
                   <Save className="w-4 h-4 mr-2" /> Save Changes
                 </Button>
               </div>
@@ -110,7 +171,7 @@ export default function SettingsPage() {
                 <label className="text-sm font-medium">Confirm New Password</label>
                 <Input type="password" placeholder="••••••••" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
               </div>
-              <Button className="mt-2 font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
+              <Button onClick={handleUpdatePassword} className="mt-2 font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
                 Update Password
               </Button>
             </CardContent>
@@ -127,7 +188,7 @@ export default function SettingsPage() {
                   <h4 className="font-semibold text-foreground">Authenticator App</h4>
                   <p className="text-sm text-muted-foreground mt-1">Use an app like Google Authenticator or Authy to generate one-time codes.</p>
                 </div>
-                <Button variant="outline" className="hover:text-primary hover:border-primary transition-colors">Enable</Button>
+                <Button onClick={handleEnable2FA} variant="outline" className="hover:text-primary hover:border-primary transition-colors">Enable</Button>
               </div>
             </CardContent>
           </Card>
@@ -160,7 +221,7 @@ export default function SettingsPage() {
               </div>
               
               <div className="pt-4 flex justify-end">
-                <Button className="font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
+                <Button onClick={handleSaveNotifications} className="font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
                   <Save className="w-4 h-4 mr-2" /> Save Preferences
                 </Button>
               </div>
@@ -172,20 +233,68 @@ export default function SettingsPage() {
           <Card className="border-border bg-card shadow-sm">
             <CardHeader className="bg-primary/5 pb-4 border-b border-border">
               <CardTitle className="flex items-center gap-2 text-primary drop-shadow-[0_0_5px_rgba(204,255,0,0.3)]">
-                <ShieldAlert className="w-5 h-5" /> KYC Verification Status: Pending
+                <ShieldAlert className="w-5 h-5" /> KYC Verification Status: {kycSubmitted ? "Submitted for Review" : "Pending"}
               </CardTitle>
-              <CardDescription>To sell products and withdraw funds, you must verify your identity.</CardDescription>
+              <CardDescription>To sell products and withdraw funds, you must verify your identity with a photo ID and a face scan.</CardDescription>
             </CardHeader>
             <CardContent className="pt-6 space-y-6">
-              <div className="p-4 bg-secondary/50 rounded-lg border border-border">
-                <h4 className="font-semibold mb-2 text-foreground">Upload ID Document</h4>
-                <p className="text-sm text-muted-foreground mb-4">Please upload a clear photo of your passport, driver&apos;s license, or national ID card.</p>
-                <div className="border-2 border-dashed border-border rounded-xl p-8 flex flex-col items-center justify-center bg-card hover:bg-secondary/50 hover:border-primary/50 transition-colors cursor-pointer text-center group">
-                  <UploadCloud className="w-8 h-8 text-muted-foreground mb-2 group-hover:text-primary transition-colors" />
-                  <p className="text-sm font-medium mb-1 group-hover:text-primary transition-colors">Upload Document</p>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="p-4 bg-secondary/50 rounded-lg border border-border">
+                  <h4 className="font-semibold mb-2 text-foreground">1. Upload ID Document</h4>
+                  <p className="text-sm text-muted-foreground mb-4">A clear photo of your passport, driver&apos;s license, or national ID card.</p>
+                  <div 
+                    onClick={!idUploaded ? handleUploadID : undefined}
+                    className={`border-2 border-dashed ${idUploaded ? 'border-success bg-success/10' : 'border-border bg-card hover:bg-secondary/50 hover:border-primary/50 cursor-pointer'} rounded-xl p-8 flex flex-col items-center justify-center transition-colors text-center group h-40`}
+                  >
+                    {idUploaded ? (
+                      <>
+                        <CheckCircle2 className="w-8 h-8 text-success mb-2" />
+                        <p className="text-sm font-medium text-success">ID Uploaded</p>
+                      </>
+                    ) : (
+                      <>
+                        <UploadCloud className={`w-8 h-8 text-muted-foreground mb-2 ${isUploadingID ? 'animate-bounce text-primary' : 'group-hover:text-primary'} transition-colors`} />
+                        <p className="text-sm font-medium mb-1 group-hover:text-primary transition-colors">
+                          {isUploadingID ? 'Uploading...' : 'Upload ID'}
+                        </p>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                <div className="p-4 bg-secondary/50 rounded-lg border border-border">
+                  <h4 className="font-semibold mb-2 text-foreground">2. Real-time Face Scan</h4>
+                  <p className="text-sm text-muted-foreground mb-4">Please grant camera permissions to capture a live selfie for liveness detection.</p>
+                  <div 
+                    onClick={!faceScanned ? handleFaceScan : undefined}
+                    className={`border-2 border-dashed ${faceScanned ? 'border-success bg-success/10' : 'border-border bg-card hover:bg-secondary/50 hover:border-primary/50 cursor-pointer'} rounded-xl p-8 flex flex-col items-center justify-center transition-colors text-center group h-40`}
+                  >
+                    {faceScanned ? (
+                      <>
+                        <CheckCircle2 className="w-8 h-8 text-success mb-2" />
+                        <p className="text-sm font-medium text-success">Scan Verified</p>
+                      </>
+                    ) : (
+                      <>
+                        <Camera className={`w-8 h-8 text-muted-foreground mb-2 ${isScanningFace ? 'animate-pulse text-primary' : 'group-hover:text-primary'} transition-colors`} />
+                        <p className="text-sm font-medium mb-1 group-hover:text-primary transition-colors">
+                          {isScanningFace ? 'Scanning...' : 'Start Camera Scan'}
+                        </p>
+                      </>
+                    )}
+                  </div>
                 </div>
               </div>
-              <Button className="w-full font-bold" disabled>Submit for Verification</Button>
+
+              <div className="pt-4 flex justify-end">
+                <Button 
+                  onClick={handleSubmitKYC}
+                  disabled={!idUploaded || !faceScanned || kycSubmitted}
+                  className="font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all disabled:opacity-50"
+                >
+                  {kycSubmitted ? "Verification Submitted" : "Submit for Verification"}
+                </Button>
+              </div>
             </CardContent>
           </Card>
         </TabsContent>
@@ -206,7 +315,7 @@ export default function SettingsPage() {
                 <Input defaultValue="Python, LangChain, React, Node.js" className="bg-secondary border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
               </div>
               <div className="pt-4 flex justify-end">
-                <Button className="font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
+                <Button onClick={handleSaveSellerProfile} className="font-bold bg-primary text-primary-foreground hover:bg-primary/90 hover:shadow-[0_0_15px_rgba(204,255,0,0.4)] transition-all">
                   <Save className="w-4 h-4 mr-2" /> Save Seller Profile
                 </Button>
               </div>

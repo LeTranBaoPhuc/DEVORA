@@ -145,6 +145,11 @@ export default function SellerDashboardPage() {
               ))}
             </TableBody>
           </Table>
+          <div className="p-4 border-t border-border flex justify-center bg-secondary/10">
+            <Button variant="outline" asChild>
+              <Link href="/dashboard/seller/orders">View All Orders</Link>
+            </Button>
+          </div>
         </Card>
       </div>
     </div>
