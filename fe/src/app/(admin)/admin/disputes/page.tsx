@@ -1,13 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, Check, RotateCcw, Search } from "lucide-react";
+import { AlertTriangle, Check, RotateCcw, Search, Eye, MessageSquare, ShieldAlert } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 type DisputeStatus = "Open" | "Reviewing" | "Resolved (Refunded)" | "Resolved (Released)";
 
@@ -29,6 +36,8 @@ export default function AdminDisputesPage() {
     { id: "DSP-5018", orderId: "ORD-9410", buyer: "DataNerd", seller: "nextjs_master", amount: 49.00, reason: "Bug in source code", status: "Resolved (Refunded)", date: "3 days ago" },
   ]);
 
+  const [selectedDispute, setSelectedDispute] = useState<Dispute | null>(null);
+
   const handleResolve = (id: string, resolution: "Resolved (Refunded)" | "Resolved (Released)") => {
     setDisputes((prev) => 
       prev.map((d) => d.id === id ? { ...d, status: resolution } : d)
@@ -37,6 +46,11 @@ export default function AdminDisputesPage() {
       toast.success(`Dispute ${id} resolved. Funds refunded to buyer.`);
     } else {
       toast.success(`Dispute ${id} resolved. Funds released to seller.`);
+    }
+    
+    // Update active sheet if open
+    if (selectedDispute?.id === id) {
+      setSelectedDispute(prev => prev ? { ...prev, status: resolution } : null);
     }
   };
 
@@ -95,36 +109,114 @@ export default function AdminDisputesPage() {
                   {dispute.status.includes("Resolved") && <Badge className="bg-success/20 text-success border-none hover:bg-success/20">Resolved</Badge>}
                 </TableCell>
                 <TableCell className="text-right">
-                  {(dispute.status === "Open" || dispute.status === "Reviewing") ? (
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => handleResolve(dispute.id, "Resolved (Refunded)")}
-                        className="h-8 text-danger hover:text-danger hover:bg-danger/10 border-danger/30"
-                        title="Refund Buyer"
-                      >
-                        <RotateCcw className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => handleResolve(dispute.id, "Resolved (Released)")}
-                        className="h-8 text-success hover:text-success hover:bg-success/10 border-success/30"
-                        title="Release to Seller"
-                      >
-                        <Check className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">{dispute.status}</span>
-                  )}
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => setSelectedDispute(dispute)}
+                    className="h-8 border-border text-foreground hover:bg-secondary"
+                  >
+                    <Eye className="w-4 h-4 mr-2" /> View Details
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </Card>
+
+      <Sheet open={!!selectedDispute} onOpenChange={(open) => !open && setSelectedDispute(null)}>
+        <SheetContent className="sm:max-w-xl overflow-y-auto">
+          {selectedDispute && (
+            <>
+              <SheetHeader className="mb-6">
+                <SheetTitle className="flex items-center gap-2">
+                  <ShieldAlert className="w-5 h-5 text-danger" /> 
+                  Dispute Details: {selectedDispute.id}
+                </SheetTitle>
+                <SheetDescription>
+                  Full audit log and chat history for this dispute.
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="space-y-6">
+                {/* Info Cards */}
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-secondary/50 p-4 rounded-lg border border-border">
+                    <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">Escrow Amount</div>
+                    <div className="text-2xl font-bold font-mono text-primary">${selectedDispute.amount.toFixed(2)}</div>
+                  </div>
+                  <div className="bg-secondary/50 p-4 rounded-lg border border-border">
+                    <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">Order ID</div>
+                    <div className="text-lg font-mono text-foreground">{selectedDispute.orderId}</div>
+                  </div>
+                </div>
+
+                {/* Complaint */}
+                <div>
+                  <h3 className="font-bold text-sm mb-2 text-foreground">Buyer Complaint</h3>
+                  <div className="p-3 bg-danger/10 text-danger-foreground rounded border border-danger/20 text-sm">
+                    "{selectedDispute.reason}"
+                  </div>
+                </div>
+
+                {/* Chat Log Mock */}
+                <div>
+                  <h3 className="font-bold text-sm mb-3 flex items-center gap-2 text-foreground">
+                    <MessageSquare className="w-4 h-4" /> Message History
+                  </h3>
+                  <div className="space-y-4 bg-background border border-border rounded-lg p-4 h-64 overflow-y-auto">
+                    <div className="flex flex-col gap-1 items-start">
+                      <span className="text-xs text-muted-foreground font-bold">{selectedDispute.buyer} (Buyer)</span>
+                      <div className="bg-secondary px-3 py-2 rounded-lg text-sm max-w-[85%]">
+                        Hello, the source code provided does not compile. There are missing dependencies.
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1 items-end">
+                      <span className="text-xs text-muted-foreground font-bold">{selectedDispute.seller} (Seller)</span>
+                      <div className="bg-primary/20 border border-primary/30 px-3 py-2 rounded-lg text-sm max-w-[85%]">
+                        Did you run `npm install`? The dependencies are all in package.json.
+                      </div>
+                    </div>
+                    <div className="flex flex-col gap-1 items-start">
+                      <span className="text-xs text-muted-foreground font-bold">{selectedDispute.buyer} (Buyer)</span>
+                      <div className="bg-secondary px-3 py-2 rounded-lg text-sm max-w-[85%]">
+                        Yes, I did. But it references a private repo that I don't have access to. I want a refund.
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Action Bar */}
+                {(selectedDispute.status === "Open" || selectedDispute.status === "Reviewing") ? (
+                  <div className="pt-4 border-t border-border space-y-3">
+                    <h3 className="font-bold text-sm text-foreground">Admin Decision</h3>
+                    <div className="flex gap-3">
+                      <Button 
+                        className="flex-1 bg-danger hover:bg-danger/90 text-white"
+                        onClick={() => handleResolve(selectedDispute.id, "Resolved (Refunded)")}
+                      >
+                        <RotateCcw className="w-4 h-4 mr-2" /> Refund Buyer
+                      </Button>
+                      <Button 
+                        className="flex-1 bg-success hover:bg-success/90 text-white"
+                        onClick={() => handleResolve(selectedDispute.id, "Resolved (Released)")}
+                      >
+                        <Check className="w-4 h-4 mr-2" /> Release to Seller
+                      </Button>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="pt-4 border-t border-border">
+                    <div className="bg-success/10 text-success border border-success/20 p-3 rounded text-sm font-medium flex items-center justify-center">
+                      <Check className="w-4 h-4 mr-2" /> {selectedDispute.status}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

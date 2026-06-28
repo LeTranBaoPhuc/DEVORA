@@ -1,13 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { Ban, Check, CheckCircle2, Clock, Search, X } from "lucide-react";
+import { Ban, Check, CheckCircle2, Clock, Search, X, Eye, FileText, Activity } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 type KYCStatus = "Pending" | "Approved" | "Rejected" | "N/A";
 type UserRole = "Buyer" | "Seller" | "Admin";
@@ -30,11 +37,17 @@ export default function AdminUsersPage() {
     { id: "USR-9910", name: "Scammer123", email: "scammer@fishy.com", role: "Buyer", kyc: "N/A", joined: "2 months ago" },
   ]);
 
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
+
   const handleKYC = (id: string, action: "Approved" | "Rejected") => {
     setUsers((prev) => 
       prev.map((u) => u.id === id ? { ...u, kyc: action } : u)
     );
     toast.success(`KYC for user ${id} has been ${action.toLowerCase()}.`);
+    
+    if (selectedUser?.id === id) {
+      setSelectedUser(prev => prev ? { ...prev, kyc: action } : null);
+    }
   };
 
   const handleBan = (id: string) => {
@@ -42,6 +55,10 @@ export default function AdminUsersPage() {
       prev.map((u) => u.id === id ? { ...u, banned: !u.banned } : u)
     );
     toast.info(`User ${id} ban status toggled.`);
+    
+    if (selectedUser?.id === id) {
+      setSelectedUser(prev => prev ? { ...prev, banned: !prev.banned } : null);
+    }
   };
 
   return (
@@ -97,45 +114,134 @@ export default function AdminUsersPage() {
                   {user.joined}
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
-                    {user.kyc === "Pending" && (
-                      <>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={() => handleKYC(user.id, "Approved")}
-                          className="h-8 text-success hover:text-success hover:bg-success/10 border-success/30"
-                          title="Approve KYC"
-                        >
-                          <Check className="w-4 h-4" />
-                        </Button>
-                        <Button 
-                          size="sm" 
-                          variant="outline" 
-                          onClick={() => handleKYC(user.id, "Rejected")}
-                          className="h-8 text-danger hover:text-danger hover:bg-danger/10 border-danger/30"
-                          title="Reject KYC"
-                        >
-                          <X className="w-4 h-4" />
-                        </Button>
-                      </>
-                    )}
-                    <Button 
-                      size="sm" 
-                      variant="outline" 
-                      onClick={() => handleBan(user.id)}
-                      className="h-8 text-muted-foreground hover:text-danger hover:bg-danger/10"
-                      title={user.banned ? "Unban User" : "Ban User"}
-                    >
-                      <Ban className="w-4 h-4" />
-                    </Button>
-                  </div>
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => setSelectedUser(user)}
+                    className="h-8 border-border text-foreground hover:bg-secondary"
+                  >
+                    <Eye className="w-4 h-4 mr-2" /> View Profile
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </Card>
+
+      <Sheet open={!!selectedUser} onOpenChange={(open) => !open && setSelectedUser(null)}>
+        <SheetContent className="sm:max-w-md overflow-y-auto">
+          {selectedUser && (
+            <>
+              <SheetHeader className="mb-6">
+                <SheetTitle className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-full bg-primary/20 text-primary flex items-center justify-center font-bold text-xs uppercase">
+                    {selectedUser.name.substring(0, 2)}
+                  </div>
+                  {selectedUser.name}
+                  {selectedUser.banned && <Badge className="bg-danger text-white ml-2">BANNED</Badge>}
+                </SheetTitle>
+                <SheetDescription>
+                  {selectedUser.id} • {selectedUser.email}
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="space-y-6">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="bg-secondary/50 p-3 rounded-lg border border-border">
+                    <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">Role</div>
+                    <div className="font-bold text-foreground">{selectedUser.role}</div>
+                  </div>
+                  <div className="bg-secondary/50 p-3 rounded-lg border border-border">
+                    <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">Joined</div>
+                    <div className="font-bold text-foreground">{selectedUser.joined}</div>
+                  </div>
+                  <div className="bg-secondary/50 p-3 rounded-lg border border-border">
+                    <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">Last IP</div>
+                    <div className="font-mono text-sm text-foreground">192.168.1.42</div>
+                  </div>
+                  <div className="bg-secondary/50 p-3 rounded-lg border border-border">
+                    <div className="text-xs text-muted-foreground mb-1 uppercase tracking-wider">Risk Score</div>
+                    <div className="font-bold text-success">Low (2%)</div>
+                  </div>
+                </div>
+
+                {selectedUser.role === "Seller" && (
+                  <div>
+                    <h3 className="font-bold text-sm mb-3 flex items-center gap-2 text-foreground">
+                      <FileText className="w-4 h-4" /> KYC Verification
+                    </h3>
+                    <div className="p-4 bg-secondary/20 border border-border rounded-lg space-y-4">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Status:</span>
+                        <span className="font-bold">{selectedUser.kyc}</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-muted-foreground">Document Type:</span>
+                        <span>Passport</span>
+                      </div>
+                      
+                      {selectedUser.kyc === "Pending" && (
+                        <div className="pt-3 border-t border-border flex gap-2">
+                          <Button size="sm" className="flex-1 bg-success hover:bg-success/90" onClick={() => handleKYC(selectedUser.id, "Approved")}>
+                            <Check className="w-4 h-4 mr-1" /> Approve
+                          </Button>
+                          <Button size="sm" className="flex-1 bg-danger hover:bg-danger/90" onClick={() => handleKYC(selectedUser.id, "Rejected")}>
+                            <X className="w-4 h-4 mr-1" /> Reject
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
+
+                <div>
+                  <h3 className="font-bold text-sm mb-3 flex items-center gap-2 text-foreground">
+                    <Activity className="w-4 h-4" /> Recent Activity
+                  </h3>
+                  <div className="space-y-3">
+                    <div className="flex gap-3 text-sm">
+                      <div className="w-2 h-2 mt-1.5 rounded-full bg-primary shrink-0"></div>
+                      <div>
+                        <div className="text-foreground">Logged in from new device</div>
+                        <div className="text-xs text-muted-foreground">Today at 10:42 AM</div>
+                      </div>
+                    </div>
+                    {selectedUser.role === "Seller" ? (
+                      <div className="flex gap-3 text-sm">
+                        <div className="w-2 h-2 mt-1.5 rounded-full bg-success shrink-0"></div>
+                        <div>
+                          <div className="text-foreground">Submitted new product for review</div>
+                          <div className="text-xs text-muted-foreground">Yesterday</div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex gap-3 text-sm">
+                        <div className="w-2 h-2 mt-1.5 rounded-full bg-info shrink-0"></div>
+                        <div>
+                          <div className="text-foreground">Purchased "Supabase Auth Template"</div>
+                          <div className="text-xs text-muted-foreground">3 days ago</div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                <div className="pt-4 border-t border-border">
+                  <Button 
+                    variant="outline" 
+                    className={`w-full ${selectedUser.banned ? 'text-success hover:text-success border-success/30' : 'text-danger hover:text-danger hover:bg-danger/10 border-danger/30'}`}
+                    onClick={() => handleBan(selectedUser.id)}
+                  >
+                    <Ban className="w-4 h-4 mr-2" /> 
+                    {selectedUser.banned ? "Lift Ban (Restore Account)" : "Ban User Account"}
+                  </Button>
+                </div>
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }

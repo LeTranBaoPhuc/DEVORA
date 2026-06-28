@@ -1,13 +1,20 @@
 "use client";
 
 import { useState } from "react";
-import { Check, CheckCircle2, Clock, Search, X } from "lucide-react";
+import { Check, CheckCircle2, Clock, Search, X, Eye, Landmark, AlertTriangle } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent } from "@/components/ui/card";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
+import {
+  Sheet,
+  SheetContent,
+  SheetDescription,
+  SheetHeader,
+  SheetTitle,
+} from "@/components/ui/sheet";
 
 type PayoutStatus = "Pending" | "Paid" | "Failed";
 
@@ -27,6 +34,8 @@ export default function AdminPayoutsPage() {
     { id: "PAY-10488", seller: "nextjs_master", amount: 3200.00, bank: "Citi •••• 1123", requested: "3 days ago", status: "Paid" },
   ]);
 
+  const [selectedPayout, setSelectedPayout] = useState<Payout | null>(null);
+
   const handlePayout = (id: string, action: "Paid" | "Failed") => {
     setPayouts((prev) => 
       prev.map((p) => p.id === id ? { ...p, status: action } : p)
@@ -35,6 +44,10 @@ export default function AdminPayoutsPage() {
       toast.success(`Payout ${id} marked as Paid.`);
     } else {
       toast.error(`Payout ${id} rejected.`);
+    }
+    
+    if (selectedPayout?.id === id) {
+      setSelectedPayout(prev => prev ? { ...prev, status: action } : null);
     }
   };
 
@@ -86,36 +99,114 @@ export default function AdminPayoutsPage() {
                   {payout.status === "Failed" && <Badge className="bg-danger/20 text-danger border-none hover:bg-danger/20">Failed</Badge>}
                 </TableCell>
                 <TableCell className="text-right">
-                  {payout.status === "Pending" ? (
-                    <div className="flex justify-end gap-2">
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => handlePayout(payout.id, "Paid")}
-                        className="h-8 text-success hover:text-success hover:bg-success/10 border-success/30"
-                        title="Mark as Paid"
-                      >
-                        <Check className="w-4 h-4" />
-                      </Button>
-                      <Button 
-                        size="sm" 
-                        variant="outline" 
-                        onClick={() => handlePayout(payout.id, "Failed")}
-                        className="h-8 text-danger hover:text-danger hover:bg-danger/10 border-danger/30"
-                        title="Reject Payout"
-                      >
-                        <X className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  ) : (
-                    <span className="text-xs text-muted-foreground">-</span>
-                  )}
+                  <Button 
+                    size="sm" 
+                    variant="outline" 
+                    onClick={() => setSelectedPayout(payout)}
+                    className="h-8 border-border text-foreground hover:bg-secondary"
+                  >
+                    <Eye className="w-4 h-4 mr-2" /> View Request
+                  </Button>
                 </TableCell>
               </TableRow>
             ))}
           </TableBody>
         </Table>
       </Card>
+
+      <Sheet open={!!selectedPayout} onOpenChange={(open) => !open && setSelectedPayout(null)}>
+        <SheetContent className="sm:max-w-md overflow-y-auto">
+          {selectedPayout && (
+            <>
+              <SheetHeader className="mb-6">
+                <SheetTitle className="flex items-center gap-2">
+                  <Landmark className="w-5 h-5 text-primary" /> 
+                  Withdrawal Request
+                </SheetTitle>
+                <SheetDescription>
+                  {selectedPayout.id} • Requested {selectedPayout.requested}
+                </SheetDescription>
+              </SheetHeader>
+
+              <div className="space-y-6">
+                <div className="bg-primary/5 p-6 rounded-xl border border-primary/20 text-center">
+                  <div className="text-sm text-muted-foreground mb-2">Requested Amount</div>
+                  <div className="text-4xl font-bold font-mono text-primary">${selectedPayout.amount.toFixed(2)}</div>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-sm mb-3 text-foreground">Seller Verification</h3>
+                  <div className="space-y-3 p-4 bg-secondary/30 rounded-lg border border-border">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Seller Name:</span>
+                      <span className="font-medium text-foreground">{selectedPayout.seller}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">KYC Status:</span>
+                      <span className="font-bold text-success">Verified</span>
+                    </div>
+                    <div className="flex justify-between text-sm items-center">
+                      <span className="text-muted-foreground">Dispute Rate:</span>
+                      <span className="font-mono text-success">0.5% (Very Low)</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="font-bold text-sm mb-3 text-foreground">Destination Account</h3>
+                  <div className="space-y-3 p-4 bg-secondary/30 rounded-lg border border-border">
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Bank Name:</span>
+                      <span className="font-medium text-foreground">{selectedPayout.bank.split(' ')[0]}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Account Number:</span>
+                      <span className="font-mono text-foreground">•••• •••• •••• {selectedPayout.bank.split(' ')[2]}</span>
+                    </div>
+                    <div className="flex justify-between text-sm">
+                      <span className="text-muted-foreground">Routing Number:</span>
+                      <span className="font-mono text-foreground">122000247</span>
+                    </div>
+                  </div>
+                </div>
+
+                {selectedPayout.status === "Pending" && (
+                  <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded flex gap-3 items-start">
+                    <AlertTriangle className="w-5 h-5 text-amber-500 shrink-0 mt-0.5" />
+                    <p className="text-xs text-amber-500 leading-relaxed">
+                      Verify that the funds have been successfully wired from the platform's main account to the destination account before marking as Paid.
+                    </p>
+                  </div>
+                )}
+
+                {selectedPayout.status === "Pending" ? (
+                  <div className="pt-4 border-t border-border flex gap-3">
+                    <Button 
+                      className="flex-1 bg-success hover:bg-success/90 text-white"
+                      onClick={() => handlePayout(selectedPayout.id, "Paid")}
+                    >
+                      <Check className="w-4 h-4 mr-2" /> Mark as Paid
+                    </Button>
+                    <Button 
+                      className="flex-1 bg-danger hover:bg-danger/90 text-white"
+                      onClick={() => handlePayout(selectedPayout.id, "Failed")}
+                    >
+                      <X className="w-4 h-4 mr-2" /> Reject Payout
+                    </Button>
+                  </div>
+                ) : (
+                  <div className="pt-4 border-t border-border">
+                    <div className={`p-3 rounded text-sm font-medium flex items-center justify-center ${selectedPayout.status === 'Paid' ? 'bg-success/10 text-success border-success/20' : 'bg-danger/10 text-danger border-danger/20'} border`}>
+                      {selectedPayout.status === 'Paid' ? <CheckCircle2 className="w-4 h-4 mr-2" /> : <X className="w-4 h-4 mr-2" />} 
+                      Status: {selectedPayout.status}
+                    </div>
+                  </div>
+                )}
+              </div>
+            </>
+          )}
+        </SheetContent>
+      </Sheet>
     </div>
   );
 }
