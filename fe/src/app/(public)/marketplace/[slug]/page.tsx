@@ -74,7 +74,7 @@ export default function ProductDetailPage() {
   const handleBuyNow = () => {
     toast.success("Redirecting to checkout...");
     setTimeout(() => {
-      router.push("/dashboard/orders/ORD-9482");
+      router.push("/checkout/1");
     }, 1000);
   };
 

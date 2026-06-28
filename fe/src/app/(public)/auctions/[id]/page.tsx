@@ -230,6 +230,19 @@ export default function AuctionDetailPage() {
                     <div className="font-medium text-foreground">{bid.deliveryDays} Days</div>
                   </div>
                 </div>
+                <div className="mt-4 pt-4 border-t border-border flex justify-end">
+                  <Button 
+                    onClick={() => {
+                      toast.success(`Bid from ${bid.bidder.username} accepted! Redirecting to checkout...`);
+                      setTimeout(() => {
+                        window.location.href = `/checkout/${bid.id}`;
+                      }, 1000);
+                    }}
+                    className="bg-primary text-primary-foreground font-bold"
+                  >
+                    Accept Bid & Lock Escrow
+                  </Button>
+                </div>
               </div>
             </div>
           ))}
