@@ -38,7 +38,7 @@ export function TopNav() {
         <div className="container mx-auto px-4 h-16 flex items-center justify-between gap-8">
           {/* Logo & Mobile Menu */}
           <div className="flex items-center gap-4">
-            <Button variant="ghost" size="icon" className="md:hidden">
+            <Button variant="ghost" size="icon" className="md:hidden" onClick={() => toast.info("Opening mobile menu...")}>
               <Menu className="h-6 w-6" />
               <span className="sr-only">Toggle menu</span>
             </Button>
@@ -107,12 +107,16 @@ export function TopNav() {
               </div>
             ) : (
               <>
-                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground rounded-full">
-                  <MessageSquare className="h-5 w-5" />
+                <Button variant="ghost" size="icon" className="text-muted-foreground hover:text-foreground rounded-full" asChild>
+                  <Link href="/messages">
+                    <MessageSquare className="h-5 w-5" />
+                  </Link>
                 </Button>
-                <Button onClick={() => toast.info("You have 3 new notifications")} variant="ghost" size="icon" className="relative rounded-full text-muted-foreground hover:text-foreground">
-                  <Bell className="h-5 w-5" />
-                  <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full shadow-[0_0_5px_rgba(204,255,0,0.5)]"></span>
+                <Button variant="ghost" size="icon" className="relative rounded-full text-muted-foreground hover:text-foreground" asChild>
+                  <Link href="/notifications">
+                    <Bell className="h-5 w-5" />
+                    <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full shadow-[0_0_5px_rgba(204,255,0,0.5)]"></span>
+                  </Link>
                 </Button>
 
                 <DropdownMenu>
@@ -133,10 +137,16 @@ export function TopNav() {
                     </DropdownMenuGroup>
                     <DropdownMenuSeparator />
                     <DropdownMenuItem>
-                      <Link href="/dashboard/buyer" className="cursor-pointer w-full">Dashboard / Mua hàng</Link>
+                      <Link href="/dashboard/buyer" className="cursor-pointer w-full">My Dashboard</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
-                      <Link href="/register-seller" className="cursor-pointer w-full text-primary hover:text-primary/80 font-medium">Kênh người bán (Trở thành Seller)</Link>
+                      <Link href="/dashboard/buyer/orders" className="cursor-pointer w-full">My Purchases</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link href="/dashboard/seller/orders" className="cursor-pointer w-full text-info hover:text-info/80 font-medium">My Sales</Link>
+                    </DropdownMenuItem>
+                    <DropdownMenuItem>
+                      <Link href="/dashboard/seller" className="cursor-pointer w-full text-primary hover:text-primary/80 font-medium">Seller Dashboard</Link>
                     </DropdownMenuItem>
                     <DropdownMenuItem>
                       <Link href="/settings" className="cursor-pointer w-full">Cài đặt tài khoản</Link>
@@ -173,6 +183,12 @@ export function TopNav() {
                 type="search" 
                 placeholder={t("nav.search")} 
                 className="w-full pl-9 border-none bg-transparent h-full focus-visible:ring-0 shadow-none text-sm rounded-none"
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    e.preventDefault();
+                    toast.info(`Searching for: ${e.currentTarget.value}`);
+                  }
+                }}
               />
             </div>
           </div>
