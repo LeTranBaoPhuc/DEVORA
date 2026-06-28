@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { LayoutDashboard, ShoppingBag, ListPlus, Wallet, Package, Settings, LogOut } from "lucide-react";
+import { LayoutDashboard, ShoppingBag, ListPlus, Wallet, Package, Settings, LogOut, MessageSquare } from "lucide-react";
 import { TopNav } from "@/components/layout/top-nav";
 import { LogoutSidebarButton } from "@/components/layout/logout-sidebar-button";
 
@@ -45,6 +45,9 @@ export default function DashboardLayout({
             <nav className="space-y-1">
               <Link href="/settings" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-colors">
                 <Settings className="w-4 h-4" /> Account Settings
+              </Link>
+              <Link href="/messages" className="flex items-center gap-3 px-3 py-2 text-sm font-medium rounded-md text-muted-foreground hover:bg-secondary/50 hover:text-foreground transition-colors">
+                <MessageSquare className="w-4 h-4" /> Messages
               </Link>
               <LogoutSidebarButton />
             </nav>
