@@ -37,7 +37,7 @@ public class AppConfig {
     private final PreFilter preFilter;
     private final CustomUserDetailsService userDetailsService;
 
-    @Value("${app.cors.allowed-origin-patterns:${app.cors.allowed-origins:http://localhost:5173}}")
+    @Value("${app.cors.allowed-origin-patterns:http://localhost:5173,http://localhost:3000}")
     private String[] allowedOriginPatterns;
 
     @Bean
@@ -46,6 +46,7 @@ public class AppConfig {
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/auth/**").permitAll()
+                        .requestMatchers("/api/v1/marketplace/**").permitAll()
                         .requestMatchers("/img/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))

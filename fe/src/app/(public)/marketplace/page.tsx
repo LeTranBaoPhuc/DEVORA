@@ -1,67 +1,106 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Search, LayoutGrid, List as ListIcon, Filter } from "lucide-react";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ProductCard } from "@/components/marketplace/product-card";
-import { FilterSidebar } from "@/components/marketplace/filter-sidebar";
-import { Sheet, SheetContent, SheetTrigger } from "@/components/ui/sheet";
-
-const MOCK_PRODUCTS = [
-  {
-    id: "1", slug: "ecommerce-mobile-app", title: "E-commerce Mobile App Full Source Code",
-    coverImage: "https://images.unsplash.com/photo-1512428559087-560fa5ceab42?auto=format&fit=crop&q=80&w=600",
-    price: 299.00, rating: 4.9, salesCount: 342, productType: "Mobile App", techStack: ["React Native", "Firebase", "Stripe"],
-    seller: { username: "AppMaster", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d", isVerified: true }
-  },
-  {
-    id: "2", slug: "saas-dashboard-nextjs", title: "Modern SaaS Dashboard & Landing Page",
-    coverImage: "https://images.unsplash.com/photo-1460925895917-afdab827c52f?auto=format&fit=crop&q=80&w=600",
-    price: 149.99, rating: 4.7, salesCount: 1205, productType: "Web App", techStack: ["Next.js", "Tailwind CSS", "Supabase"],
-    seller: { username: "WebNinja", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704e", isVerified: false }
-  },
-  {
-    id: "3", slug: "social-media-management", title: "Social Media Management Platform",
-    coverImage: "https://images.unsplash.com/photo-1611162617474-5b21e879e113?auto=format&fit=crop&q=80&w=600",
-    price: 499.00, rating: 4.8, salesCount: 89, productType: "Web App", techStack: ["MERN Stack", "Socket.io", "AWS"],
-    seller: { username: "CodeCrafter", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704f", isVerified: true }
-  },
-  {
-    id: "4", slug: "fitness-tracking-app", title: "Pro Fitness & Workout Tracking App",
-    coverImage: "https://images.unsplash.com/photo-1526506114642-990520a2e053?auto=format&fit=crop&q=80&w=600",
-    price: 199.00, rating: 4.6, salesCount: 2341, productType: "Mobile App", techStack: ["Flutter", "Dart", "Firebase"],
-    seller: { username: "FitDevs", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704g", isVerified: true }
-  },
-  {
-    id: "5", slug: "real-estate-portal", title: "Premium Real Estate Listing Portal",
-    coverImage: "https://images.unsplash.com/photo-1560518883-ce09059eeffa?auto=format&fit=crop&q=80&w=600",
-    price: 345.00, rating: 4.9, salesCount: 672, productType: "Web App", techStack: ["Vue.js", "Laravel", "MySQL"],
-    seller: { username: "PropertyTech", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704h", isVerified: false }
-  },
-  {
-    id: "6", slug: "food-delivery-kit", title: "Complete Food Delivery App Solution",
-    coverImage: "https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?auto=format&fit=crop&q=80&w=600",
-    price: 599.00, rating: 4.5, salesCount: 42, productType: "Mobile App", techStack: ["Swift", "Kotlin", "Node.js"],
-    seller: { username: "EatsApp", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704i", isVerified: true }
-  },
-  {
-    id: "7", slug: "job-board-platform", title: "Niche Job Board & Recruitment Platform",
-    coverImage: "https://images.unsplash.com/photo-1486312338219-ce68d2c6f44d?auto=format&fit=crop&q=80&w=600",
-    price: 250.00, rating: 4.8, salesCount: 512, productType: "Web App", techStack: ["Django", "React", "PostgreSQL"],
-    seller: { username: "HireDev", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704j", isVerified: true }
-  },
-  {
-    id: "8", slug: "portfolio-template-pro", title: "Creative Developer Portfolio Template",
-    coverImage: "https://images.unsplash.com/photo-1498050108023-c5249f4df085?auto=format&fit=crop&q=80&w=600",
-    price: 49.00, rating: 4.4, salesCount: 890, productType: "Website", techStack: ["HTML", "CSS", "JavaScript", "GSAP"],
-    seller: { username: "UIUX_Master", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704k", isVerified: false }
-  },
-];
+import { FilterSidebar, FilterState } from "@/components/marketplace/filter-sidebar";
+import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/components/ui/sheet";
 
 export default function MarketplacePage() {
   const [viewMode, setViewMode] = useState<"grid" | "list">("grid");
+  
+  const [products, setProducts] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [sort, setSort] = useState("newest");
+  const [page, setPage] = useState(1);
+  const [totalPages, setTotalPages] = useState(1);
+  const [totalItems, setTotalItems] = useState(0);
+
+  const [filters, setFilters] = useState<FilterState>({
+    categories: [],
+    minPrice: "",
+    maxPrice: "",
+    productTypes: [],
+    techStacks: [],
+    minRating: null,
+    verifiedSeller: false,
+  });
+
+  const handleFilterChange = (key: keyof FilterState, value: any) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+    setPage(1); // Reset page on filter change
+  };
+
+  const handleClearAll = () => {
+    setFilters({
+      categories: [],
+      minPrice: "",
+      maxPrice: "",
+      productTypes: [],
+      techStacks: [],
+      minRating: null,
+      verifiedSeller: false,
+    });
+    setSearch("");
+    setSearchInput("");
+    setSort("newest");
+    setPage(1);
+  };
+
+  // Debounced search
+  const [searchInput, setSearchInput] = useState("");
+  
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      setSearch(searchInput);
+      setPage(1); // Reset page on new search
+    }, 500);
+    return () => clearTimeout(timer);
+  }, [searchInput]);
+
+  useEffect(() => {
+    const fetchProducts = async () => {
+      setLoading(true);
+      try {
+        const queryParams = new URLSearchParams();
+        queryParams.append("page", page.toString());
+        queryParams.append("size", "9");
+        queryParams.append("sort", sort);
+        if (search) queryParams.append("search", search);
+        
+        if (filters.categories.length > 0) {
+          queryParams.append("categories", filters.categories.join(","));
+        }
+        if (filters.minPrice) queryParams.append("minPrice", filters.minPrice);
+        if (filters.maxPrice) queryParams.append("maxPrice", filters.maxPrice);
+        if (filters.productTypes.length > 0) {
+          queryParams.append("productTypes", filters.productTypes.join(","));
+        }
+        if (filters.techStacks.length > 0) {
+          queryParams.append("techStacks", filters.techStacks.join(","));
+        }
+        if (filters.minRating) queryParams.append("minRating", filters.minRating.toString());
+        if (filters.verifiedSeller) queryParams.append("verifiedSeller", "true");
+
+        const res = await fetch(`http://localhost:8080/api/v1/marketplace/products?${queryParams}`);
+        const json = await res.json();
+        if (json.status === 200 && json.data) {
+          setProducts(json.data.data);
+          setTotalPages(json.data.totalPages);
+          setTotalItems(json.data.totalItems);
+        }
+      } catch (error) {
+        console.error("Failed to fetch products", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchProducts();
+  }, [page, sort, search, filters]);
 
   return (
     <div className="container mx-auto px-4 py-8">
@@ -74,7 +113,7 @@ export default function MarketplacePage() {
       <div className="flex flex-col lg:flex-row gap-8">
         {/* Left Sidebar Filters */}
         <aside className="w-full lg:w-64 shrink-0">
-          <FilterSidebar />
+          <FilterSidebar filters={filters} onFilterChange={handleFilterChange} onClearAll={handleClearAll} />
         </aside>
 
         {/* Main Content */}
@@ -87,8 +126,9 @@ export default function MarketplacePage() {
                   <Filter className="w-4 h-4" />
                 </SheetTrigger>
                 <SheetContent side="left" className="w-[300px] sm:w-[400px]">
+                  <SheetTitle className="sr-only">Filters</SheetTitle>
                   <div className="mt-6">
-                    <FilterSidebar />
+                    <FilterSidebar filters={filters} onFilterChange={handleFilterChange} onClearAll={handleClearAll} />
                   </div>
                 </SheetContent>
               </Sheet>
@@ -98,16 +138,18 @@ export default function MarketplacePage() {
                 <Input 
                   placeholder="Search products..." 
                   className="pl-9 bg-card border-border hover:border-border-hover w-full"
+                  value={searchInput}
+                  onChange={(e) => setSearchInput(e.target.value)}
                 />
               </div>
             </div>
 
             <div className="flex items-center gap-3 w-full sm:w-auto">
               <span className="text-sm text-muted-foreground hidden md:inline-block">
-                Showing 1-8 of 12,482
+                Showing {products.length > 0 ? (page - 1) * 9 + 1 : 0}-{Math.min(page * 9, totalItems)} of {totalItems}
               </span>
               
-              <Select defaultValue="newest">
+              <Select value={sort} onValueChange={(val) => { setSort(val); setPage(1); }}>
                 <SelectTrigger className="w-[160px] bg-card border-border">
                   <SelectValue placeholder="Sort by" />
                 </SelectTrigger>
@@ -142,25 +184,48 @@ export default function MarketplacePage() {
           </div>
 
           {/* Product Grid / List */}
-          <div className={viewMode === "grid" 
-            ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6" 
-            : "flex flex-col gap-4"
-          }>
-            {MOCK_PRODUCTS.map((product) => (
-              <ProductCard key={product.id} {...product} layout={viewMode} />
-            ))}
-          </div>
+          {loading ? (
+            <div className="flex items-center justify-center py-24">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
+            </div>
+          ) : products.length === 0 ? (
+            <div className="flex flex-col items-center justify-center py-24 text-center">
+              <p className="text-muted-foreground text-lg">No products found matching your criteria.</p>
+            </div>
+          ) : (
+            <div className={viewMode === "grid" 
+              ? "grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-6" 
+              : "flex flex-col gap-4"
+            }>
+              {products.map((product) => (
+                <ProductCard key={product.id} {...product} layout={viewMode} />
+              ))}
+            </div>
+          )}
 
           {/* Pagination */}
-          <div className="mt-12 flex justify-center items-center gap-2">
-            <Button variant="outline" disabled>Previous</Button>
-            <Button variant="default" className="w-10 h-10 p-0">1</Button>
-            <Button variant="outline" className="w-10 h-10 p-0">2</Button>
-            <Button variant="outline" className="w-10 h-10 p-0">3</Button>
-            <span className="text-muted-foreground">...</span>
-            <Button variant="outline" className="w-10 h-10 p-0">10</Button>
-            <Button variant="outline">Next</Button>
-          </div>
+          {!loading && totalPages > 1 && (
+            <div className="mt-12 flex justify-center items-center gap-2">
+              <Button 
+                variant="outline" 
+                disabled={page <= 1}
+                onClick={() => setPage(p => Math.max(1, p - 1))}
+              >
+                Previous
+              </Button>
+              
+              {/* Simple pagination display for now */}
+              <span className="text-sm px-4">Page {page} of {totalPages}</span>
+              
+              <Button 
+                variant="outline" 
+                disabled={page >= totalPages}
+                onClick={() => setPage(p => Math.min(totalPages, p + 1))}
+              >
+                Next
+              </Button>
+            </div>
+          )}
         </div>
       </div>
     </div>
