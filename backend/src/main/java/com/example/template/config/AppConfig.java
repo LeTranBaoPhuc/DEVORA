@@ -13,6 +13,7 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityCustomizer;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
+import org.springframework.http.HttpMethod;
 
 import static org.springframework.security.config.http.SessionCreationPolicy.STATELESS;
 
@@ -47,6 +48,7 @@ public class AppConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/v1/marketplace/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/auctions/**").permitAll()
                         .requestMatchers("/img/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))

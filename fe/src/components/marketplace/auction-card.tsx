@@ -6,6 +6,7 @@ import { Clock, Hammer, Users } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { formatDistanceToNow } from "date-fns";
 
 export interface AuctionCardProps {
   id: string;
@@ -19,6 +20,7 @@ export interface AuctionCardProps {
     username: string;
     avatar: string;
   };
+  createdAt: string;
   skills: string[];
   status: "OPEN" | "IN_PROGRESS" | "COMPLETED";
 }
@@ -32,6 +34,7 @@ export function AuctionCard({
   deadline,
   bidCount,
   buyer,
+  createdAt,
   skills,
   status
 }: AuctionCardProps) {
@@ -76,9 +79,14 @@ export function AuctionCard({
                 <AvatarImage src={buyer.avatar} />
                 <AvatarFallback>{buyer.username.slice(0, 2)}</AvatarFallback>
               </Avatar>
-              <Link href={`/profile/${buyer.username}`} className="text-sm text-muted-foreground hover:text-foreground">
-                Posted by {buyer.username}
-              </Link>
+              <div className="text-sm text-muted-foreground flex items-center gap-1.5">
+                <span>Posted by</span>
+                <Link href={`/profile/${buyer.username}`} className="hover:text-foreground font-medium transition-colors">
+                  {buyer.username}
+                </Link>
+                <span>•</span>
+                <span title={new Date(createdAt).toLocaleString()}>{formatDistanceToNow(new Date(createdAt), { addSuffix: true })}</span>
+              </div>
             </div>
           </div>
 

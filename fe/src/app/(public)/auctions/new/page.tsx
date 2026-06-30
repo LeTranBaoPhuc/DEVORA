@@ -5,6 +5,8 @@ import { useRouter } from "next/navigation";
 import { ArrowLeft, Rocket, UploadCloud } from "lucide-react";
 import Link from "next/link";
 import { toast } from "sonner";
+import { auctionApi } from "@/apis/auction.api";
+import { useAuth } from "@/contexts/auth.context";
 import { Button, buttonVariants } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -12,17 +14,48 @@ import { Textarea } from "@/components/ui/textarea";
 
 export default function NewAuctionPage() {
   const router = useRouter();
+  const { user } = useAuth();
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleSubmit = async (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (!user) {
+      toast.error("You must be logged in to post a request");
+      return;
+    }
+    
     setIsSubmitting(true);
     
-    // Simulate API delay
-    await new Promise(resolve => setTimeout(resolve, 1500));
+    const formData = new FormData(e.currentTarget);
+    const deadlineDate = new Date();
+    deadlineDate.setDate(deadlineDate.getDate() + 7); // Default 7 days from now
+
+    // Parse Budget: e.g. "500 - 1000"
+    const budgetStr = (formData.get("budget") as string) || "100 - 500";
+    const budgetParts = budgetStr.split("-").map(s => Number(s.trim()));
+    const budgetMin = budgetParts[0] || 100;
+    const budgetMax = budgetParts[1] || budgetMin;
+
+    const newAuction = {
+      title: formData.get("title") as string,
+      categoryId: 1, // Defaulting to category 1 for now
+      description: formData.get("description") as string,
+      budgetMin: budgetMin,
+      budgetMax: budgetMax,
+      deadline: deadlineDate.toISOString(),
+      skills: (formData.get("skills") as string).split(",").map(s => s.trim()).filter(Boolean),
+      preferredTechStack: [],
+    };
     
-    toast.success("Your request has been posted successfully! Sellers can now bid on it.");
-    router.push("/dashboard/buyer/auctions");
+    try {
+      await auctionApi.createAuction(newAuction);
+      toast.success("Your request has been posted successfully! Sellers can now bid on it.");
+      router.push("/auctions");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to create auction");
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   return (
@@ -50,28 +83,28 @@ export default function NewAuctionPage() {
           <form onSubmit={handleSubmit} className="space-y-6">
             <div className="space-y-2">
               <label className="text-sm font-bold text-foreground">Project Title *</label>
-              <Input required placeholder="e.g. Custom LangChain Agent for processing PDFs" className="h-12 bg-secondary/50 border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+              <Input name="title" required placeholder="e.g. Custom LangChain Agent for processing PDFs" className="h-12 bg-secondary/50 border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-bold text-foreground">Detailed Description *</label>
-              <Textarea required placeholder="Describe the features, tech stack, and any specific requirements..." className="min-h-[150px] bg-secondary/50 border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+              <Textarea name="description" required placeholder="Describe the features, tech stack, and any specific requirements..." className="min-h-[150px] bg-secondary/50 border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label className="text-sm font-bold text-foreground">Estimated Budget ($) *</label>
-                <Input required type="text" placeholder="e.g. 500 - 1000" className="h-12 bg-secondary/50 border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+                <Input name="budget" required type="text" placeholder="e.g. 500 - 1000" className="h-12 bg-secondary/50 border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
               </div>
               <div className="space-y-2">
                 <label className="text-sm font-bold text-foreground">Expected Timeline *</label>
-                <Input required type="text" placeholder="e.g. 2 weeks" className="h-12 bg-secondary/50 border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+                <Input name="timeline" required type="text" placeholder="e.g. 2 weeks" className="h-12 bg-secondary/50 border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
               </div>
             </div>
 
             <div className="space-y-2">
               <label className="text-sm font-bold text-foreground">Required Skills (Comma separated)</label>
-              <Input placeholder="e.g. Next.js, Python, Supabase" className="h-12 bg-secondary/50 border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
+              <Input name="skills" placeholder="e.g. Next.js, Python, Supabase" className="h-12 bg-secondary/50 border-border focus-visible:ring-primary focus-visible:border-primary transition-colors" />
             </div>
 
             <div className="space-y-2">
