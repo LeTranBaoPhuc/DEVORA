@@ -1,12 +1,12 @@
 package com.example.template.repository;
 
-import com.example.template.model.Seller;
+import com.example.template.model.AuctionCategory;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface SellerRepository extends JpaRepository<Seller, Long> {
-    Optional<Seller> findByUserId(Long userId);
+public interface AuctionCategoryRepository extends JpaRepository<AuctionCategory, Long> {
+    Optional<AuctionCategory> findBySlug(String slug);
 }
