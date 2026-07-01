@@ -9,8 +9,8 @@ import { User } from "@/types";
 
 type AuthContextType = {
   user: User | null;
-  login: (email: string, password: string) => Promise<boolean>;
-  loginWithGoogle: (token: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<User | boolean>;
+  loginWithGoogle: (token: string) => Promise<User | boolean>;
   register: (data: any) => Promise<boolean>;
   verifyRegister: (email: string, otp: string) => Promise<boolean>;
   logout: () => void;
@@ -24,17 +24,20 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
 
-  const fetchProfile = async () => {
+  const fetchProfile = async (): Promise<User | null> => {
     try {
       const response = await userApi.getProfile();
       if (response && response.data) {
         setUser(response.data);
+        return response.data;
       }
+      return null;
     } catch (error) {
       console.error("Failed to fetch profile", error);
       setUser(null);
       localStorage.removeItem("accessToken");
       localStorage.removeItem("refreshToken");
+      return null;
     } finally {
       setIsLoading(false);
     }
@@ -49,7 +52,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
-  const login = async (email: string, password: string): Promise<boolean> => {
+  const login = async (email: string, password: string): Promise<User | boolean> => {
     try {
       // The backend LoginRequest accepts username or email and password
       const response = await authApi.login({ email, password });
@@ -59,8 +62,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (response.refreshToken) {
           localStorage.setItem("refreshToken", response.refreshToken);
         }
-        await fetchProfile();
-        return true;
+        const user = await fetchProfile();
+        return user || true;
       }
       return false;
     } catch (error: any) {
@@ -68,7 +71,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   };
 
-  const loginWithGoogle = async (token: string): Promise<boolean> => {
+  const loginWithGoogle = async (token: string): Promise<User | boolean> => {
     try {
       const response = await authApi.googleLogin({ token });
       if (response && response.accessToken) {
@@ -76,8 +79,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         if (response.refreshToken) {
           localStorage.setItem("refreshToken", response.refreshToken);
         }
-        await fetchProfile();
-        return true;
+        const user = await fetchProfile();
+        return user || true;
       }
       return false;
     } catch (error: any) {

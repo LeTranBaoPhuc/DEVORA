@@ -31,10 +31,14 @@ export default function LoginPage() {
     
     setIsSubmitting(true);
     try {
-      const success = await login(email, password);
-      if (success) {
+      const result = await login(email, password);
+      if (result) {
         toast.success("Welcome back!");
-        router.push(ROUTES.HOME);
+        if (typeof result === 'object' && result.role === 'ADMIN') {
+          router.push("/admin");
+        } else {
+          router.push(ROUTES.HOME);
+        }
       } else {
         setErrorMessage("Login failed. Please check your credentials.");
       }
@@ -48,10 +52,14 @@ export default function LoginPage() {
   const handleGoogleSuccess = async (credentialResponse: CredentialResponse) => {
     if (credentialResponse.credential) {
       try {
-        const success = await loginWithGoogle(credentialResponse.credential);
-        if (success) {
+        const result = await loginWithGoogle(credentialResponse.credential);
+        if (result) {
           toast.success("Đăng nhập bằng Google thành công!");
-          router.push(ROUTES.HOME);
+          if (typeof result === 'object' && result.role === 'ADMIN') {
+            router.push("/admin");
+          } else {
+            router.push(ROUTES.HOME);
+          }
         } else {
           setErrorMessage("Đăng nhập Google thất bại.");
         }
