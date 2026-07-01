@@ -1,11 +1,40 @@
+"use client";
+
 import Link from "next/link";
 import { BarChart3, Users, Package, AlertTriangle, ShieldCheck, Settings, LogOut } from "lucide-react";
+import { useAuth } from "@/contexts/auth.context";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+import { toast } from "sonner";
 
 export default function AdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  const { user, isLoading } = useAuth();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (!isLoading) {
+      if (!user) {
+        toast.error("Vui lòng đăng nhập để tiếp tục");
+        router.push("/login");
+      } else if (user.role !== "ADMIN") {
+        toast.error("Bạn không có quyền truy cập trang quản trị");
+        router.push("/marketplace");
+      }
+    }
+  }, [user, isLoading, router]);
+
+  if (isLoading || !user || user.role !== "ADMIN") {
+    return (
+      <div className="flex h-screen w-full items-center justify-center bg-background">
+        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+      </div>
+    );
+  }
+
   return (
     <div className="flex h-screen flex-col bg-background">
       {/* Admin TopNav */}
@@ -17,8 +46,10 @@ export default function AdminLayout({
           <span className="font-heading font-bold text-lg hidden sm:inline-block">DEVORA</span>
         </Link>
         <div className="flex items-center gap-4 text-sm font-medium">
-          <span className="text-muted-foreground">Admin User</span>
-          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center border border-border">A</div>
+          <span className="text-muted-foreground">{user.firstName} {user.lastName}</span>
+          <div className="w-8 h-8 rounded-full bg-secondary flex items-center justify-center border border-border">
+            {user.firstName?.charAt(0) || "A"}
+          </div>
         </div>
       </header>
 

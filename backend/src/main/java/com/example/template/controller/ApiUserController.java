@@ -83,7 +83,7 @@ public class ApiUserController {
     }
 
     @GetMapping("/customer/{phone}")
-    @org.springframework.security.access.prepost.PreAuthorize("hasAnyAuthority('ADMIN', 'STAFF')")
+    @org.springframework.security.access.prepost.PreAuthorize("hasAnyAuthority('ADMIN', 'SELLER')")
     public ApiResponse getCustomerByPhone(@org.springframework.web.bind.annotation.PathVariable String phone) {
         ProfileResponse response = userService.getProfileByPhone(phone);
         return ApiResponse.builder()

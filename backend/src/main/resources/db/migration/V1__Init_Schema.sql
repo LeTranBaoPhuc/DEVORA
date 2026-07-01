@@ -4,7 +4,7 @@ CREATE TABLE `roles` (
     `id` bigint NOT NULL AUTO_INCREMENT,
     `updated_at` datetime(6) DEFAULT NULL,
     `description` varchar(500) DEFAULT NULL,
-    `name` enum('ADMIN','STAFF','USER') NOT NULL,
+    `name` enum('ADMIN','SELLER','USER') NOT NULL,
     `created_by` varchar(255) DEFAULT NULL,
     `updated_by` varchar(255) DEFAULT NULL,
     PRIMARY KEY (`id`),

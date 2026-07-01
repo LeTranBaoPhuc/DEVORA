@@ -37,7 +37,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
         SELECT DISTINCT u
         FROM User u
         JOIN u.roles r
-        WHERE r.name = com.example.template.common.enums.ERole.STAFF
+        WHERE r.name = com.example.template.common.enums.ERole.SELLER
           AND (:name IS NULL OR LOWER(u.username) LIKE LOWER(CONCAT('%', :name, '%')))
     """)
     Page<User> searchStaffByName(String name, Pageable pageable);
@@ -46,7 +46,7 @@ public interface UserRepository extends JpaRepository<User, Long> {
         SELECT DISTINCT u
         FROM User u
         JOIN FETCH u.roles r
-        WHERE r.name = com.example.template.common.enums.ERole.STAFF
+        WHERE r.name = com.example.template.common.enums.ERole.SELLER
     """)
     java.util.List<User> findAllStaffs();
 

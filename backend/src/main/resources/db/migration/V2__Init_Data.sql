@@ -1,7 +1,7 @@
 -- Seed roles
 INSERT INTO roles (name, description, created_at, updated_at)
 VALUES ('ADMIN', 'Quản trị hệ thống', NOW(), NOW()),
-       ('STAFF', 'Nhân viên', NOW(), NOW()),
+       ('SELLER', 'Người bán hàng', NOW(), NOW()),
        ('USER', 'Người dùng', NOW(), NOW());
 
 -- Seed users (Default password is '123456' for all seeded users)
@@ -9,12 +9,12 @@ VALUES ('ADMIN', 'Quản trị hệ thống', NOW(), NOW()),
 INSERT INTO users (id, username, password, email, first_name, last_name, status, phone, created_at, updated_at)
 VALUES
 (1, 'admin', '$2a$10$s3go5e.GYivSMmrJXG6jceddjfSAbg6O832Sip8XIVNRRLIjXNP6G', 'admin@example.com', 'Admin', 'Template', 'ACTIVE', '0900000001', NOW(), NOW()),
-(2, 'staff', '$2a$10$s3go5e.GYivSMmrJXG6jceddjfSAbg6O832Sip8XIVNRRLIjXNP6G', 'staff@example.com', 'Staff', 'Template', 'ACTIVE', '0900000002', NOW(), NOW()),
+(2, 'seller', '$2a$10$s3go5e.GYivSMmrJXG6jceddjfSAbg6O832Sip8XIVNRRLIjXNP6G', 'seller@example.com', 'Seller', 'Template', 'ACTIVE', '0900000002', NOW(), NOW()),
 (3, 'user', '$2a$10$s3go5e.GYivSMmrJXG6jceddjfSAbg6O832Sip8XIVNRRLIjXNP6G', 'user@example.com', 'User', 'Template', 'ACTIVE', '0900000003', NOW(), NOW());
 
 -- Map users to roles
--- Admin gets ADMIN (1), STAFF (2), and USER (3)
--- Staff gets STAFF (2) and USER (3)
+-- Admin gets ADMIN (1), SELLER (2), and USER (3)
+-- Seller gets SELLER (2) and USER (3)
 -- User gets USER (3)
 INSERT INTO user_roles (user_id, role_id)
 VALUES (1, 1),
