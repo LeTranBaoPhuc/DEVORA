@@ -43,6 +43,15 @@ export const auctionApi = {
     body: JSON.stringify(data),
   }),
 
+  updateAuction: (id: number | string, data: any) => http<any>(`/api/auctions/${id}`, {
+    method: 'PUT',
+    body: JSON.stringify(data),
+  }),
+
+  deleteAuction: (id: number | string) => http<any>(`/api/auctions/${id}`, {
+    method: 'DELETE',
+  }),
+
   placeBid: (data: any) => http<any>('/api/auctions/bids', {
     method: 'POST',
     body: JSON.stringify(data),

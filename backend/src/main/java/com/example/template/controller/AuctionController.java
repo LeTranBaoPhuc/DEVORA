@@ -56,6 +56,19 @@ public class AuctionController {
         return ResponseEntity.ok(auctionService.createAuction(request));
     }
 
+    @PutMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<AuctionResponse> updateAuction(@PathVariable Long id, @RequestBody AuctionRequest request) {
+        return ResponseEntity.ok(auctionService.updateAuction(id, request));
+    }
+
+    @DeleteMapping("/{id}")
+    @PreAuthorize("isAuthenticated()")
+    public ResponseEntity<Void> deleteAuction(@PathVariable Long id) {
+        auctionService.deleteAuction(id);
+        return ResponseEntity.ok().build();
+    }
+
     @PostMapping("/bids")
     @PreAuthorize("isAuthenticated()")
     public ResponseEntity<BidResponse> placeBid(@RequestBody BidRequest request) {

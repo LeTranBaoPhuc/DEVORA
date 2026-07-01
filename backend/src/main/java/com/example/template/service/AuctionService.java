@@ -116,6 +116,59 @@ public class AuctionService {
     }
 
     @Transactional
+    public AuctionResponse updateAuction(Long id, AuctionRequest request) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        Auction auction = auctionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Auction not found"));
+
+        if (!auction.getBuyer().getId().equals(currentUser.getId())) {
+            throw new BadRequestException("Only the auction buyer can update this auction");
+        }
+
+        AuctionCategory category = auctionCategoryRepository.findById(request.getCategoryId())
+                .orElseThrow(() -> new ResourceNotFoundException("Category not found"));
+
+        auction.setCategory(category);
+        auction.setTitle(request.getTitle());
+        auction.setDescription(request.getDescription());
+        auction.setBudgetMin(request.getBudgetMin());
+        auction.setBudgetMax(request.getBudgetMax());
+        auction.setDeadline(request.getDeadline());
+        try {
+            auction.setSkills(objectMapper.writeValueAsString(request.getSkills()));
+            auction.setPreferredTechStack(objectMapper.writeValueAsString(request.getPreferredTechStack()));
+        } catch (Exception e) {
+            // Log error
+        }
+
+        Auction savedAuction = auctionRepository.save(auction);
+        return mapToAuctionResponse(savedAuction);
+    }
+
+    @Transactional
+    public void deleteAuction(Long id) {
+        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        User currentUser = userRepository.findByUsername(username)
+                .orElseThrow(() -> new ResourceNotFoundException("User not found"));
+
+        Auction auction = auctionRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Auction not found"));
+
+        if (!auction.getBuyer().getId().equals(currentUser.getId())) {
+            throw new BadRequestException("Only the auction buyer can delete this auction");
+        }
+
+        if (auction.getStatus() != EAuctionStatus.OPEN) {
+            throw new BadRequestException("Cannot delete auction after a bid has been accepted");
+        }
+
+        auctionRepository.delete(auction);
+    }
+
+    @Transactional
     public BidResponse placeBid(BidRequest request) {
         String username = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByUsername(username)
@@ -247,7 +300,6 @@ public class AuctionService {
     }
 
     private String generateSlug(String title) {
-        return title.toLowerCase().replaceAll("[^a-z0-9\\s]", "").replaceAll("\\s+", "-") 
-               + "-" + System.currentTimeMillis();
+        return java.util.UUID.randomUUID().toString();
     }
 }

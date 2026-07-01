@@ -4,13 +4,15 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
-import { ArrowLeft, Clock, Hammer, ShieldCheck, Star, Users } from "lucide-react";
+import { ArrowLeft, Clock, Hammer, ShieldCheck, Star, Users, Edit3, Trash2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Sheet, SheetContent, SheetDescription, SheetHeader, SheetTitle, SheetFooter } from "@/components/ui/sheet";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { auctionApi } from "@/apis/auction.api";
 import { useAuth } from "@/contexts/auth.context";
 
@@ -24,6 +26,12 @@ export default function AuctionDetailPage() {
   const [loading, setLoading] = useState(true);
   const [isBidding, setIsBidding] = useState(false);
   const [isAccepting, setIsAccepting] = useState<number | null>(null);
+  
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [editErrors, setEditErrors] = useState<Record<string, string>>({});
 
   const fetchAuctionAndBids = async () => {
     if (!id) return;
@@ -91,6 +99,78 @@ export default function AuctionDetailPage() {
     }
   };
 
+  const handleUpdateAuction = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const formData = new FormData(e.currentTarget);
+    const newErrors: Record<string, string> = {};
+
+    const title = formData.get("title") as string;
+    const description = formData.get("description") as string;
+    const skills = formData.get("skills") as string;
+    
+    if (!title) newErrors.title = "Vui lòng điền tiêu đề dự án";
+    if (!description) newErrors.description = "Vui lòng điền mô tả dự án";
+    if (!skills) newErrors.skills = "Vui lòng nhập kỹ năng yêu cầu";
+
+    const budgetMinRaw = formData.get("budgetMin");
+    const budgetMaxRaw = formData.get("budgetMax");
+    const budgetMin = Number(budgetMinRaw);
+    const budgetMax = Number(budgetMaxRaw);
+
+    if (!budgetMinRaw) newErrors.budgetMin = "Vui lòng nhập giá Min";
+    else if (budgetMin < 0) newErrors.budgetMin = "Giá không được âm";
+
+    if (!budgetMaxRaw) newErrors.budgetMax = "Vui lòng nhập giá Max";
+    else if (budgetMax < 0) newErrors.budgetMax = "Giá không được âm";
+    else if (budgetMax <= budgetMin) newErrors.budgetMax = "Giá Max phải lớn hơn Min";
+
+    if (Object.keys(newErrors).length > 0) {
+      setEditErrors(newErrors);
+      return;
+    }
+    setEditErrors({});
+    setIsUpdating(true);
+
+    const deadlineDate = new Date();
+    deadlineDate.setDate(deadlineDate.getDate() + 7);
+
+    const updatedAuction = {
+      title,
+      categoryId: auction.categoryId,
+      description,
+      budgetMin,
+      budgetMax,
+      deadline: deadlineDate.toISOString(),
+      skills: skills.split(",").map(s => s.trim()).filter(Boolean),
+      preferredTechStack: auction.preferredTechStack || [],
+    };
+    
+    try {
+      await auctionApi.updateAuction(auction.id, updatedAuction);
+      toast.success("Cập nhật dự án thành công!");
+      setIsEditDialogOpen(false);
+      fetchAuctionAndBids();
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi khi cập nhật");
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
+  const handleDeleteAuction = async () => {
+    setIsDeleting(true);
+    try {
+      await auctionApi.deleteAuction(auction.id);
+      toast.success("Xóa dự án thành công!");
+      router.push("/auctions");
+    } catch (err: any) {
+      toast.error(err.message || "Lỗi khi xóa");
+    } finally {
+      setIsDeleting(false);
+      setIsDeleteDialogOpen(false);
+    }
+  };
+
   if (loading) {
     return <div className="container mx-auto px-4 py-8 text-center text-muted-foreground">Loading...</div>;
   }
@@ -124,8 +204,19 @@ export default function AuctionDetailPage() {
                 Posted on {new Date(auction.createdAt).toLocaleDateString()}
               </span>
             </div>
-            
-            <h1 className="text-3xl md:text-4xl font-heading font-bold mb-6">{auction.title}</h1>
+            <div className="flex items-start justify-between mb-6 gap-4">
+              <h1 className="text-3xl md:text-4xl font-heading font-bold">{auction.title}</h1>
+              {isBuyer && auction.status === "OPEN" && (
+                <div className="flex items-center gap-2 flex-shrink-0">
+                  <Button variant="outline" size="sm" onClick={() => setIsEditDialogOpen(true)}>
+                    <Edit3 className="w-4 h-4 mr-2" /> Sửa
+                  </Button>
+                  <Button variant="destructive" size="sm" onClick={() => setIsDeleteDialogOpen(true)}>
+                    <Trash2 className="w-4 h-4 mr-2" /> Xóa
+                  </Button>
+                </div>
+              )}
+            </div>
             
             <div className="prose prose-invert max-w-none prose-p:leading-relaxed prose-p:text-muted-foreground mb-8 whitespace-pre-wrap font-sans text-[15px]">
               {auction.description}
@@ -289,6 +380,108 @@ export default function AuctionDetailPage() {
           </div>
         )}
       </div>
+
+      <Sheet open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <SheetContent side="right" className="w-full sm:max-w-xl overflow-y-auto">
+          <SheetHeader className="mb-6">
+            <SheetTitle className="font-heading text-2xl">Sửa thông tin dự án</SheetTitle>
+            <SheetDescription>Cập nhật lại yêu cầu của dự án. URL chia sẻ sẽ được giữ nguyên.</SheetDescription>
+          </SheetHeader>
+          <form onSubmit={handleUpdateAuction} className="space-y-6" noValidate>
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Tiêu đề dự án <span className="text-destructive">*</span></label>
+              <Input
+                name="title"
+                defaultValue={auction.title}
+                placeholder="VD: Thiết kế website bán hàng..."
+                className={editErrors.title ? "border-destructive" : ""}
+              />
+              {editErrors.title && <p className="text-sm text-destructive mt-1">{editErrors.title}</p>}
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Mô tả chi tiết <span className="text-destructive">*</span></label>
+              <Textarea
+                name="description"
+                defaultValue={auction.description}
+                rows={5}
+                placeholder="Mô tả rõ yêu cầu công việc..."
+                className={`resize-none ${editErrors.description ? "border-destructive" : ""}`}
+              />
+              {editErrors.description && <p className="text-sm text-destructive mt-1">{editErrors.description}</p>}
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Ngân sách Tối thiểu ($) <span className="text-destructive">*</span></label>
+                <Input
+                  name="budgetMin"
+                  type="number"
+                  defaultValue={auction.budgetMin}
+                  placeholder="50"
+                  className={editErrors.budgetMin ? "border-destructive" : ""}
+                />
+                {editErrors.budgetMin && <p className="text-sm text-destructive mt-1">{editErrors.budgetMin}</p>}
+              </div>
+              <div className="space-y-2">
+                <label className="text-sm font-medium">Ngân sách Tối đa ($) <span className="text-destructive">*</span></label>
+                <Input
+                  name="budgetMax"
+                  type="number"
+                  defaultValue={auction.budgetMax}
+                  placeholder="500"
+                  className={editErrors.budgetMax ? "border-destructive" : ""}
+                />
+                {editErrors.budgetMax && <p className="text-sm text-destructive mt-1">{editErrors.budgetMax}</p>}
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <label className="text-sm font-medium">Kỹ năng yêu cầu <span className="text-destructive">*</span></label>
+              <Input
+                name="skills"
+                defaultValue={auction.skills?.join(", ")}
+                placeholder="VD: React, Node.js, Design (cách nhau bằng dấu phẩy)"
+                className={editErrors.skills ? "border-destructive" : ""}
+              />
+              {editErrors.skills && <p className="text-sm text-destructive mt-1">{editErrors.skills}</p>}
+            </div>
+
+            <SheetFooter className="mt-8">
+              <Button type="button" variant="outline" onClick={() => setIsEditDialogOpen(false)} disabled={isUpdating}>
+                Hủy
+              </Button>
+              <Button type="submit" disabled={isUpdating}>
+                {isUpdating ? "Đang lưu..." : "Lưu thay đổi"}
+              </Button>
+            </SheetFooter>
+          </form>
+        </SheetContent>
+      </Sheet>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Bạn có chắc chắn muốn xóa dự án này?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Hành động này không thể hoàn tác. Dự án này và tất cả các lượt đấu thầu (bids) của nó sẽ bị xóa vĩnh viễn khỏi hệ thống.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Hủy</AlertDialogCancel>
+            <AlertDialogAction
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+              onClick={(e) => {
+                e.preventDefault();
+                handleDeleteAuction();
+              }}
+              disabled={isDeleting}
+            >
+              {isDeleting ? "Đang xóa..." : "Xóa dự án"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }
