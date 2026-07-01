@@ -29,20 +29,11 @@ export default function AuctionDetailPage() {
     if (!id) return;
     try {
       setLoading(true);
-      const [auctionRes, bidsRes] = await Promise.all([
-        auctionApi.getAuctionById(id as string).catch(() => auctionApi.getAuctionBySlug(id as string)),
-        auctionApi.getBidsForAuction(id as string) // We should technically use auction ID if slug is passed, but ID works
-      ]);
-
+      const auctionRes = await auctionApi.getAuctionById(id as string).catch(() => auctionApi.getAuctionBySlug(id as string));
       setAuction(auctionRes);
 
-      // If we looked up by slug, we should fetch bids by the retrieved auction's ID
-      if (isNaN(Number(id))) {
-        const bidsResBySlug = await auctionApi.getBidsForAuction(auctionRes.id);
-        setBids(bidsResBySlug);
-      } else {
-        setBids(bidsRes);
-      }
+      const bidsRes = await auctionApi.getBidsForAuction(auctionRes.id);
+      setBids(bidsRes);
       
     } catch (err) {
       toast.error("Failed to load auction details.");

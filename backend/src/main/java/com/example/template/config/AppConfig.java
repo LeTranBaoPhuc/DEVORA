@@ -50,6 +50,8 @@ public class AppConfig {
                         .requestMatchers("/api/v1/marketplace/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/auctions/**").permitAll()
                         .requestMatchers("/img/**").permitAll()
+                        .requestMatchers("/ws/**").permitAll()
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(manager -> manager.sessionCreationPolicy(STATELESS))
                 .authenticationProvider(authenticationProvider())

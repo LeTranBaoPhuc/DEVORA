@@ -14,6 +14,8 @@ import { useAuth } from "@/contexts/auth.context";
 export default function AuctionsPage() {
   const { user } = useAuth();
   const [auctions, setAuctions] = useState<AuctionCardProps[]>([]);
+  const [mounted, setMounted] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(true);
   
@@ -100,17 +102,56 @@ export default function AuctionsPage() {
     }
     
     const formData = new FormData(e.currentTarget);
+    const newErrors: Record<string, string> = {};
+
+    const title = formData.get("title") as string;
+    const description = formData.get("description") as string;
+    const skills = formData.get("skills") as string;
+    
+    if (!title) newErrors.title = "Vui lòng điền tiêu đề dự án";
+    if (!description) newErrors.description = "Vui lòng điền mô tả dự án";
+    if (!skills) newErrors.skills = "Vui lòng nhập kỹ năng yêu cầu";
+
+    const budgetMinRaw = formData.get("budgetMin");
+    const budgetMaxRaw = formData.get("budgetMax");
+
+    if (!budgetMinRaw) {
+      newErrors.budgetMin = "Vui lòng nhập giá Min";
+    } else if (Number(budgetMinRaw) < 0) {
+      newErrors.budgetMin = "Budget cannot be negative";
+    }
+
+    if (!budgetMaxRaw) {
+      newErrors.budgetMax = "Vui lòng nhập giá Max";
+    } else if (Number(budgetMaxRaw) < 0) {
+      newErrors.budgetMax = "Budget cannot be negative";
+    }
+
+    const budgetMin = Number(budgetMinRaw);
+    const budgetMax = Number(budgetMaxRaw);
+
+    if (!newErrors.budgetMax && !newErrors.budgetMin && budgetMax <= budgetMin) {
+      newErrors.budgetMax = "Max budget must be greater than Min budget";
+    }
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+    
+    setErrors({});
+
     const deadlineDate = new Date();
     deadlineDate.setDate(deadlineDate.getDate() + 7); // Default 7 days from now
 
     const newAuction = {
-      title: formData.get("title") as string,
+      title,
       categoryId: 1, // Defaulting to category 1 for now, in real app should match the select
-      description: formData.get("description") as string,
-      budgetMin: Number(formData.get("budgetMin")) || 100,
-      budgetMax: Number(formData.get("budgetMax")) || 500,
+      description,
+      budgetMin,
+      budgetMax,
       deadline: deadlineDate.toISOString(),
-      skills: (formData.get("skills") as string).split(",").map(s => s.trim()).filter(Boolean),
+      skills: skills.split(",").map(s => s.trim()).filter(Boolean),
       preferredTechStack: [],
     };
     
@@ -146,25 +187,29 @@ export default function AuctionsPage() {
                   Describe what you need built. Verified developers will review your request and place their bids.
                 </SheetDescription>
               </SheetHeader>
-              <form onSubmit={handleSubmit} className="mt-6 space-y-6">
+              <form onSubmit={handleSubmit} noValidate className="mt-6 space-y-6">
                 <div className="space-y-2">
                   <label htmlFor="title" className="text-sm font-medium">Project Title</label>
-                  <Input id="title" name="title" placeholder="e.g. Need a fullstack e-commerce app..." required className="bg-background border-border" />
+                  <Input id="title" name="title" placeholder="e.g. Need a fullstack e-commerce app..." className={`bg-background ${errors.title ? 'border-red-500 focus-visible:ring-red-500' : 'border-border'}`} />
+                  {errors.title && <p className="text-red-500 text-xs mt-1">{errors.title}</p>}
                 </div>
                 
                 <div className="space-y-2">
                   <label htmlFor="description" className="text-sm font-medium">Description</label>
-                  <Textarea id="description" name="description" placeholder="Describe the project requirements in detail..." required className="min-h-[120px] bg-background border-border" />
+                  <Textarea id="description" name="description" placeholder="Describe the project requirements in detail..." className={`min-h-[120px] bg-background ${errors.description ? 'border-red-500 focus-visible:ring-red-500' : 'border-border'}`} />
+                  {errors.description && <p className="text-red-500 text-xs mt-1">{errors.description}</p>}
                 </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
                     <label htmlFor="budgetMin" className="text-sm font-medium">Min Budget ($)</label>
-                    <Input id="budgetMin" name="budgetMin" type="number" placeholder="100" required className="bg-background border-border" />
+                    <Input id="budgetMin" name="budgetMin" type="number" min="0" placeholder="100" className={`bg-background ${errors.budgetMin ? 'border-red-500 focus-visible:ring-red-500' : 'border-border'}`} />
+                    {errors.budgetMin && <p className="text-red-500 text-xs mt-1">{errors.budgetMin}</p>}
                   </div>
                   <div className="space-y-2">
                     <label htmlFor="budgetMax" className="text-sm font-medium">Max Budget ($)</label>
-                    <Input id="budgetMax" name="budgetMax" type="number" placeholder="500" required className="bg-background border-border" />
+                    <Input id="budgetMax" name="budgetMax" type="number" min="0" placeholder="500" className={`bg-background ${errors.budgetMax ? 'border-red-500 focus-visible:ring-red-500' : 'border-border'}`} />
+                    {errors.budgetMax && <p className="text-red-500 text-xs mt-1">{errors.budgetMax}</p>}
                   </div>
                 </div>
 
@@ -185,7 +230,8 @@ export default function AuctionsPage() {
 
                 <div className="space-y-2">
                   <label htmlFor="skills" className="text-sm font-medium">Required Skills (comma separated)</label>
-                  <Input id="skills" name="skills" placeholder="e.g. React, Node.js, Stripe" required className="bg-background border-border" />
+                  <Input id="skills" name="skills" placeholder="e.g. React, Node.js, Stripe" className={`bg-background ${errors.skills ? 'border-red-500 focus-visible:ring-red-500' : 'border-border'}`} />
+                  {errors.skills && <p className="text-red-500 text-xs mt-1">{errors.skills}</p>}
                 </div>
 
                 <SheetFooter className="mt-8 pt-4 border-t border-border">

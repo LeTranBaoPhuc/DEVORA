@@ -17,6 +17,7 @@ import com.example.template.repository.BidRepository;
 import com.example.template.repository.UserRepository;
 import com.example.template.repository.SellerRepository;
 import com.example.template.repository.specification.AuctionSpecification;
+import com.example.template.service.notification.NotificationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -42,6 +43,7 @@ public class AuctionService {
     private final BidRepository bidRepository;
     private final UserRepository userRepository;
     private final SellerRepository sellerRepository;
+    private final NotificationService notificationService;
     private final ObjectMapper objectMapper = new ObjectMapper();
 
     public PageResponse<AuctionResponse> getAuctions(AuctionFilterRequest request) {
@@ -142,6 +144,17 @@ public class AuctionService {
         bid.setStatus(EBidStatus.PENDING);
 
         Bid savedBid = bidRepository.save(bid);
+        
+        // Gửi thông báo cho người đăng bài (buyer)
+        String notificationTitle = "Có seller mới tham gia đấu thầu!";
+        String notificationMessage = String.format("Seller %s vừa đặt giá $%s cho dự án '%s' của bạn.", 
+                bidder.getUser().getUsername(), 
+                request.getPrice(), 
+                auction.getTitle());
+        String actionUrl = "/auctions/" + auction.getSlug();
+                
+        notificationService.sendNotification(auction.getBuyer(), notificationTitle, notificationMessage, actionUrl);
+        
         return mapToBidResponse(savedBid);
     }
     
@@ -175,6 +188,15 @@ public class AuctionService {
         // Also update auction status
         auction.setStatus(EAuctionStatus.IN_PROGRESS);
         auctionRepository.save(auction);
+        
+        // Notify the seller
+        String notificationTitle = "Trúng thầu dự án!";
+        String notificationMessage = String.format("Chúc mừng! %s vừa chấp nhận lời đề nghị của bạn cho dự án '%s'.", 
+                currentUser.getUsername(), 
+                auction.getTitle());
+        String actionUrl = "/auctions/" + auction.getSlug();
+                
+        notificationService.sendNotification(bid.getBidder().getUser(), notificationTitle, notificationMessage, actionUrl);
         
         // Reject all other bids? (Optional business logic)
         

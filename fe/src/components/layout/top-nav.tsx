@@ -8,8 +8,12 @@ import { Input } from "@/components/ui/input";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useTheme } from "next-themes";
 import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import { useLanguage } from "@/contexts/language.context";
 import { useAuth } from "@/hooks/useAuth";
+import { useNotifications } from "@/hooks/useNotifications";
+import { formatDistanceToNow } from 'date-fns';
+import { vi } from 'date-fns/locale';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -27,7 +31,10 @@ export function TopNav() {
   const { theme, setTheme } = useTheme();
   const { lang, setLang, t } = useLanguage();
   const { user, logout, isLoading } = useAuth();
+  const { notifications, markAsRead } = useNotifications();
+  const router = useRouter();
   const [mounted, setMounted] = useState(false);
+  const unreadCount = notifications.filter(n => !n.isRead).length;
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -98,7 +105,11 @@ export function TopNav() {
                   <DropdownMenuTrigger render={
                     <Button variant="ghost" size="icon" className="relative rounded-full text-muted-foreground hover:text-foreground">
                       <Bell className="h-5 w-5" />
-                      <span className="absolute top-2 right-2 w-2 h-2 bg-primary rounded-full shadow-[0_0_5px_rgba(204,255,0,0.5)]"></span>
+                      {unreadCount > 0 && (
+                        <span className="absolute top-1 right-1 flex items-center justify-center w-4 h-4 bg-red-500 text-[10px] font-bold text-white rounded-full shadow-md">
+                          {unreadCount > 9 ? '9+' : unreadCount}
+                        </span>
+                      )}
                     </Button>
                   } />
                   <DropdownMenuContent align="end" className="w-80">
@@ -107,21 +118,32 @@ export function TopNav() {
                       <Link href="/notifications" className="text-xs text-primary hover:underline">Mở rộng</Link>
                     </div>
                     <div className="py-2 px-1 max-h-80 overflow-y-auto">
-                      <div className="px-3 py-2 hover:bg-secondary/50 rounded-md cursor-pointer mb-1 transition-colors">
-                        <p className="text-sm font-medium text-foreground">Đơn hàng mới #1234</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">Bạn có 1 đơn hàng mới từ John Doe</p>
-                        <p className="text-[10px] text-muted-foreground mt-1.5 font-medium">2 phút trước</p>
-                      </div>
-                      <div className="px-3 py-2 hover:bg-secondary/50 rounded-md cursor-pointer mb-1 transition-colors">
-                        <p className="text-sm font-medium text-foreground">Đánh giá sản phẩm</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">Sản phẩm "Web Template" vừa nhận đánh giá 5 sao</p>
-                        <p className="text-[10px] text-muted-foreground mt-1.5 font-medium">1 giờ trước</p>
-                      </div>
-                      <div className="px-3 py-2 hover:bg-secondary/50 rounded-md cursor-pointer transition-colors">
-                        <p className="text-sm font-medium text-foreground">Hệ thống</p>
-                        <p className="text-xs text-muted-foreground mt-0.5">Yêu cầu rút tiền $500 đã hoàn tất</p>
-                        <p className="text-[10px] text-muted-foreground mt-1.5 font-medium">1 ngày trước</p>
-                      </div>
+                      {notifications.length === 0 ? (
+                        <div className="px-3 py-4 text-center text-muted-foreground text-sm">
+                          Không có thông báo nào
+                        </div>
+                      ) : (
+                        notifications.map((notification) => (
+                          <div 
+                            key={notification.id} 
+                            onClick={() => {
+                                if (!notification.isRead) {
+                                    markAsRead(notification.id);
+                                }
+                                if (notification.actionUrl) {
+                                    router.push(notification.actionUrl);
+                                }
+                            }}
+                            className={`px-3 py-2 rounded-md cursor-pointer mb-1 transition-colors ${notification.isRead ? 'opacity-60 hover:bg-secondary/30' : 'bg-primary/5 hover:bg-primary/10 border-l-2 border-primary'}`}
+                          >
+                            <p className="text-sm font-medium text-foreground">{notification.title}</p>
+                            <p className="text-xs text-muted-foreground mt-0.5 line-clamp-2">{notification.message}</p>
+                            <p className="text-[10px] text-muted-foreground mt-1.5 font-medium">
+                                {formatDistanceToNow(new Date(notification.createdAt), { addSuffix: true, locale: vi })}
+                            </p>
+                          </div>
+                        ))
+                      )}
                     </div>
                   </DropdownMenuContent>
                 </DropdownMenu>
