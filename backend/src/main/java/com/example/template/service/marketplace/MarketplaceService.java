@@ -6,4 +6,5 @@ import com.example.template.dto.response.ProductResponse;
 
 public interface MarketplaceService {
     PageResponse<ProductResponse> getProducts(ProductFilterRequest filterRequest);
+    ProductResponse getProductBySlug(String slug);
 }

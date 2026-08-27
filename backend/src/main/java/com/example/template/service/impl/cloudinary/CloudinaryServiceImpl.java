@@ -8,6 +8,7 @@ import com.example.template.service.cloudinary.CloudinaryService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -33,14 +34,22 @@ public class CloudinaryServiceImpl implements CloudinaryService {
 
     private final List<String> allowedContentTypes = List.of("image/jpeg", "image/png", "image/webp");
 
+    @Value("${cloudinary.cloud_name:your-cloud-name}")
+    private String cloudName;
+
     @Override
     public String uploadAvatar(MultipartFile file, String oldAvatarUrl) {
         log.info("Starting upload avatar process");
 
         validate(file);
 
+        if ("your-cloud-name".equals(cloudName)) {
+            log.warn("Cloudinary is not configured. Using a mock avatar URL.");
+            return "https://i.pravatar.cc/150?u=" + UUID.randomUUID().toString();
+        }
+
         try {
-            if (!StringUtils.isBlank(oldAvatarUrl)) {
+            if (!StringUtils.isBlank(oldAvatarUrl) && !oldAvatarUrl.startsWith("http://") && !oldAvatarUrl.startsWith("https://i.pravatar.cc")) {
                 String publicId = getPublicIdFromUrl(oldAvatarUrl);
                 if (publicId != null) {
                     log.debug("Deleting old avatar with public_id: {}", publicId);
@@ -75,7 +84,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
             return secureUrl;
         } catch (Exception e) {
             log.error("Error while uploading avatar file, message={}.", e.getMessage(), e);
-            return "Error while uploading avatar file: " + e.getMessage();
+            throw new InvalidDataException("Error while uploading avatar file: " + e.getMessage());
         }
     }
 

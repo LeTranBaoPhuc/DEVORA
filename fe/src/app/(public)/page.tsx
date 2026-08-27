@@ -7,6 +7,8 @@ import { ProductCard } from "@/components/marketplace/product-card";
 import { SellerCard } from "@/components/marketplace/seller-card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { useLanguage } from "@/contexts/language.context";
+import { useEffect, useState } from "react";
+import { marketplaceApi } from "@/apis/marketplace.api";
 
 const CATEGORIES = [
   { name: "AI Agents", icon: Bot, count: "1.2k" },
@@ -19,80 +21,7 @@ const CATEGORIES = [
   { name: "E-commerce Tools", icon: ShoppingCart, count: "510" },
 ];
 
-const FEATURED_PRODUCTS = [
-  {
-    id: "1",
-    slug: "customer-support-agent",
-    title: "Autonomous Customer Support AI Agent with Zendesk Integration",
-    coverImage: "https://images.unsplash.com/photo-1677442136019-21780ecad995?auto=format&fit=crop&q=80&w=600",
-    price: 149.00,
-    rating: 4.9,
-    salesCount: 342,
-    productType: "AI Agent",
-    techStack: ["Python", "LangChain", "OpenAI"],
-    seller: { username: "NeuralNinja", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d", isVerified: true }
-  },
-  {
-    id: "2",
-    slug: "notion-habit-tracker",
-    title: "Advanced Notion Habit Tracker + Data Visualization Mini App",
-    coverImage: "https://images.unsplash.com/photo-1555949963-ff9fe0c870eb?auto=format&fit=crop&q=80&w=600",
-    price: 29.99,
-    rating: 4.7,
-    salesCount: 1205,
-    productType: "Mini App",
-    techStack: ["Next.js", "Tailwind", "Notion API"],
-    seller: { username: "vibe_creator", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704e", isVerified: false }
-  },
-  {
-    id: "3",
-    slug: "x-auto-poster",
-    title: "Twitter/X Viral Auto-Poster Script with Sentiment Analysis",
-    coverImage: "https://images.unsplash.com/photo-1611605698335-8b1569810432?auto=format&fit=crop&q=80&w=600",
-    price: 59.00,
-    rating: 4.8,
-    salesCount: 89,
-    productType: "Automation Script",
-    techStack: ["Node.js", "Puppeteer", "VADER"],
-    seller: { username: "ScriptKiddiePro", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704f", isVerified: true }
-  },
-  {
-    id: "4",
-    slug: "seo-blog-writer",
-    title: "Ultimate SEO Blog Writer Prompt Template pack (100+ Prompts)",
-    coverImage: "https://images.unsplash.com/photo-1499750310107-5fef28a66643?auto=format&fit=crop&q=80&w=600",
-    price: 15.00,
-    rating: 4.6,
-    salesCount: 2341,
-    productType: "Prompt Template",
-    techStack: ["ChatGPT", "Claude", "Gemini"],
-    seller: { username: "PromptMaster", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704g", isVerified: true }
-  },
-  {
-    id: "5",
-    slug: "discord-moderator",
-    title: "Discord Community Moderator Bot with Anti-Spam & Leveling",
-    coverImage: "https://images.unsplash.com/photo-1614680376593-902f74cf0d41?auto=format&fit=crop&q=80&w=600",
-    price: 45.00,
-    rating: 4.9,
-    salesCount: 672,
-    productType: "Chatbot",
-    techStack: ["Discord.js", "MongoDB", "Express"],
-    seller: { username: "BotSmith", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704h", isVerified: false }
-  },
-  {
-    id: "6",
-    slug: "crypto-arbitrage",
-    title: "Crypto Arbitrage High-Frequency Trading Bot",
-    coverImage: "https://images.unsplash.com/photo-1605792657660-596af9009e82?auto=format&fit=crop&q=80&w=600",
-    price: 499.00,
-    rating: 4.5,
-    salesCount: 42,
-    productType: "Data Tool",
-    techStack: ["Go", "Redis", "Docker"],
-    seller: { username: "QuantVibes", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704i", isVerified: true }
-  }
-];
+
 
 const TRENDING_SELLERS = [
   { username: "NeuralNinja", avatar: "https://i.pravatar.cc/150?u=a042581f4e29026704d", bio: "Full-stack AI developer specializing in LangChain and autonomous agents.", rating: 4.9, salesCount: 1240, isVerified: true, skills: ["Python", "OpenAI", "React"] },
@@ -102,6 +31,28 @@ const TRENDING_SELLERS = [
 
 export default function LandingPage() {
   const { t } = useLanguage();
+  const [featuredProducts, setFeaturedProducts] = useState<any[]>([]);
+
+  useEffect(() => {
+    const fetchFeaturedProducts = async () => {
+      try {
+        const res = await marketplaceApi.getProducts({ size: 6 });
+        if (res.data?.data) {
+          const mapped = res.data.data.map(p => ({
+            ...p,
+            seller: {
+              ...p.seller,
+              isVerified: p.seller.verified
+            }
+          }));
+          setFeaturedProducts(mapped);
+        }
+      } catch (error) {
+        console.error("Failed to fetch featured products:", error);
+      }
+    };
+    fetchFeaturedProducts();
+  }, []);
 
   return (
     <div className="flex flex-col min-h-screen">
@@ -201,7 +152,7 @@ export default function LandingPage() {
 
           {/* Masonry-style Grid Simulation */}
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-x-8 gap-y-12">
-            {FEATURED_PRODUCTS.map((prod, i) => (
+            {featuredProducts.map((prod, i) => (
               <div key={prod.id} className={`flex flex-col ${i % 2 !== 0 ? 'lg:mt-16' : ''}`}>
                  <ProductCard {...prod} />
               </div>

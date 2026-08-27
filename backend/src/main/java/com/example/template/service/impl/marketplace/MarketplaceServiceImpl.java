@@ -1,5 +1,7 @@
 package com.example.template.service.impl.marketplace;
 
+import com.example.template.exception.ResourceNotFoundException;
+
 import com.example.template.common.enums.EKycStatus;
 import com.example.template.dto.request.ProductFilterRequest;
 import com.example.template.dto.response.PageResponse;
@@ -58,6 +60,13 @@ public class MarketplaceServiceImpl implements MarketplaceService {
                 .totalItems(products.getTotalElements())
                 .data(productResponses)
                 .build();
+    }
+
+    @Override
+    public ProductResponse getProductBySlug(String slug) {
+        Product product = productRepository.findBySlug(slug)
+                .orElseThrow(() -> new ResourceNotFoundException("Product not found with slug: " + slug));
+        return mapToProductResponse(product);
     }
 
     private ProductResponse mapToProductResponse(Product product) {

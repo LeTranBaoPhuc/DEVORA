@@ -18,4 +18,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
            "(:category IS NULL OR p.category.slug = :category) AND " +
            "p.status = 'ACTIVE'")
     Page<Product> findProducts(@Param("search") String search, @Param("category") String category, Pageable pageable);
+
+    java.util.Optional<Product> findBySlug(String slug);
 }

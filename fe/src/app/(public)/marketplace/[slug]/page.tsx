@@ -1,9 +1,10 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useParams } from "next/navigation";
 import { toast } from "sonner";
+import { marketplaceApi } from "@/apis/marketplace.api";
 import { Star, Download, Heart, ShieldCheck, Share2, Check, ExternalLink, ShoppingCart, ChevronRight, CheckCircle2, Copy, MessageSquare, Play, Globe, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
@@ -72,6 +73,43 @@ export default function ProductDetailPage() {
   const [purchaseTier, setPurchaseTier] = useState<"source" | "managed">("source");
   const [hostingBilling, setHostingBilling] = useState<"monthly" | "yearly">("monthly");
   const router = useRouter();
+  const params = useParams();
+  const slug = params?.slug as string;
+  
+  const [product, setProduct] = useState(PRODUCT);
+
+  useEffect(() => {
+    if (slug) {
+      marketplaceApi.getProductBySlug(slug)
+        .then(res => {
+          if (res.data) {
+            const apiData = res.data;
+            setProduct(prev => ({
+              ...prev,
+              id: apiData.id,
+              slug: apiData.slug,
+              title: apiData.title,
+              coverImage: apiData.coverImage,
+              images: [apiData.coverImage, ...prev.images.slice(1)],
+              price: apiData.price,
+              rating: apiData.rating,
+              salesCount: apiData.salesCount,
+              productType: apiData.productType,
+              techStack: apiData.techStack,
+              seller: {
+                ...prev.seller,
+                username: apiData.seller.username,
+                avatar: apiData.seller.avatar,
+                isVerified: apiData.seller.verified
+              }
+            }));
+          }
+        })
+        .catch(err => {
+          console.error("Failed to fetch product:", err);
+        });
+    }
+  }, [slug]);
 
   const handleBuyNow = () => {
     toast.success("Redirecting to checkout...");
@@ -81,7 +119,7 @@ export default function ProductDetailPage() {
   };
 
   const handleChat = () => {
-    router.push("/messages?seller=" + PRODUCT.seller.username);
+    router.push("/messages?seller=" + product.seller.username);
   };
 
   const handleWishlist = () => {
@@ -113,7 +151,7 @@ export default function ProductDetailPage() {
             </BreadcrumbItem>
             <BreadcrumbSeparator />
             <BreadcrumbItem>
-              <BreadcrumbPage>{PRODUCT.title}</BreadcrumbPage>
+              <BreadcrumbPage>{product.title}</BreadcrumbPage>
             </BreadcrumbItem>
           </BreadcrumbList>
         </Breadcrumb>
@@ -123,7 +161,7 @@ export default function ProductDetailPage() {
         {/* Left Column: Image Gallery */}
         <div className="lg:col-span-2 space-y-4">
           <div className="aspect-[16/9] bg-secondary rounded-xl overflow-hidden border border-border relative group">
-            <img src={PRODUCT.images[activeImage]} alt={PRODUCT.title} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
+            <img src={product.images[activeImage]} alt={product.title} className="w-full h-full object-cover transition-transform group-hover:scale-105 duration-500" />
             
             <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
               <Dialog>
@@ -136,11 +174,11 @@ export default function ProductDetailPage() {
                   <div className="h-14 bg-zinc-900 flex items-center justify-between px-6 text-white border-b border-zinc-800 shrink-0">
                     <div className="flex items-center gap-3">
                       <Globe className="w-5 h-5 text-zinc-400" />
-                      <span className="font-medium text-zinc-100">{PRODUCT.title} - Live Demo</span>
+                      <span className="font-medium text-zinc-100">{product.title} - Live Demo</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Button variant="ghost" size="icon" className="h-9 w-9 rounded-full text-zinc-400 hover:text-white hover:bg-zinc-800" asChild>
-                        <a href={PRODUCT.demoUrl} target="_blank" rel="noopener noreferrer" title="Open in new tab">
+                        <a href={product.demoUrl} target="_blank" rel="noopener noreferrer" title="Open in new tab">
                           <ExternalLink className="w-4 h-4" />
                         </a>
                       </Button>
@@ -156,18 +194,18 @@ export default function ProductDetailPage() {
                     <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
                       <div className="w-8 h-8 border-4 border-zinc-800 border-t-primary rounded-full animate-spin"></div>
                     </div>
-                    <iframe src={PRODUCT.demoUrl} className="w-full h-full border-none relative z-10 bg-white" allow="fullscreen" />
+                    <iframe src={product.demoUrl} className="w-full h-full border-none relative z-10 bg-white" allow="fullscreen" />
                   </div>
                 </DialogContent>
               </Dialog>
             </div>
 
             <Badge className="absolute top-4 left-4 bg-background/90 backdrop-blur-md text-foreground border-none shadow-sm font-medium px-3 py-1">
-              {PRODUCT.productType}
+              {product.productType}
             </Badge>
           </div>
           <div className="grid grid-cols-5 gap-3">
-            {PRODUCT.images.map((img, i) => (
+            {product.images.map((img, i) => (
               <div 
                 key={i} 
                 className={`aspect-video rounded-lg overflow-hidden border-2 cursor-pointer transition-colors ${activeImage === i ? 'border-primary' : 'border-border hover:border-border-hover'}`}
@@ -185,27 +223,27 @@ export default function ProductDetailPage() {
                 <TabsTrigger value="overview" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-6 py-3 font-medium">Overview</TabsTrigger>
                 <TabsTrigger value="demo" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-6 py-3 font-medium">Demo</TabsTrigger>
                 <TabsTrigger value="docs" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-6 py-3 font-medium">Documentation</TabsTrigger>
-                <TabsTrigger value="reviews" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-6 py-3 font-medium">Reviews ({PRODUCT.reviewCount})</TabsTrigger>
+                <TabsTrigger value="reviews" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-6 py-3 font-medium">Reviews ({product.reviewCount})</TabsTrigger>
                 <TabsTrigger value="qa" className="data-[state=active]:bg-transparent data-[state=active]:shadow-none data-[state=active]:border-b-2 data-[state=active]:border-primary rounded-none px-6 py-3 font-medium">Q&A</TabsTrigger>
               </TabsList>
               
               <TabsContent value="overview" className="pt-6 space-y-8">
                 <div>
                   <h3 className="text-xl font-heading font-semibold mb-4">About this Product</h3>
-                  <p className="text-muted-foreground leading-relaxed">{PRODUCT.description}</p>
+                  <p className="text-muted-foreground leading-relaxed">{product.description}</p>
                 </div>
 
                 <div className="grid sm:grid-cols-2 gap-6">
                   <div>
                     <h4 className="font-medium mb-3 text-sm uppercase tracking-wider text-muted-foreground">Tech Stack</h4>
                     <div className="flex flex-wrap gap-2">
-                      {PRODUCT.techStack.map(t => <Badge key={t} variant="secondary" className="font-normal">{t}</Badge>)}
+                      {product.techStack.map(t => <Badge key={t} variant="secondary" className="font-normal">{t}</Badge>)}
                     </div>
                   </div>
                   <div>
                     <h4 className="font-medium mb-3 text-sm uppercase tracking-wider text-muted-foreground">Tools & Libraries</h4>
                     <div className="flex flex-wrap gap-2">
-                      {PRODUCT.aiToolsUsed.map(t => <Badge key={t} variant="outline" className="font-normal border-border">{t}</Badge>)}
+                      {product.aiToolsUsed.map(t => <Badge key={t} variant="outline" className="font-normal border-border">{t}</Badge>)}
                     </div>
                   </div>
                 </div>
@@ -213,7 +251,7 @@ export default function ProductDetailPage() {
                 <div>
                   <h4 className="font-medium mb-3 text-sm uppercase tracking-wider text-muted-foreground">Compatible Platforms</h4>
                   <ul className="grid grid-cols-2 gap-2 text-sm text-foreground">
-                    {PRODUCT.compatiblePlatforms.map(platform => (
+                    {product.compatiblePlatforms.map(platform => (
                       <li key={platform} className="flex items-center gap-2">
                         <Check className="w-4 h-4 text-success" /> {platform}
                       </li>
@@ -234,7 +272,7 @@ export default function ProductDetailPage() {
                     <span>Watch Video Demo</span>
                   </div>
                   <div className="grid grid-cols-2 gap-4 mt-4">
-                    {PRODUCT.images.map((img, i) => (
+                    {product.images.map((img, i) => (
                       <div 
                         key={i} 
                         onClick={() => {
@@ -267,28 +305,28 @@ export default function ProductDetailPage() {
         <div className="space-y-6">
           <div className="p-6 rounded-xl border border-border bg-card sticky top-24">
             <div className="mb-2 flex flex-wrap gap-2">
-              {PRODUCT.aiVerified && (
+              {product.aiVerified && (
                 <Badge variant="default" className="bg-primary/20 text-primary border-none flex items-center gap-1.5">
-                  <ShieldCheck className="w-3.5 h-3.5" /> AI Verified (Score: {PRODUCT.aiQualityScore}/100)
+                  <ShieldCheck className="w-3.5 h-3.5" /> AI Verified (Score: {product.aiQualityScore}/100)
                 </Badge>
               )}
               <Badge variant="outline" className="border-border text-muted-foreground">
-                {PRODUCT.licenseType}
+                {product.licenseType}
               </Badge>
             </div>
 
-            <h1 className="text-2xl font-heading font-bold mb-4">{PRODUCT.title}</h1>
+            <h1 className="text-2xl font-heading font-bold mb-4">{product.title}</h1>
             
             <div className="flex items-center gap-4 text-sm text-muted-foreground mb-6 pb-6 border-b border-border">
               <div className="flex items-center gap-1.5">
                 <Star className="w-4 h-4 fill-amber-500 text-amber-500" />
-                <span className="font-medium text-foreground">{PRODUCT.rating.toFixed(1)}</span>
-                <span>({PRODUCT.reviewCount})</span>
+                <span className="font-medium text-foreground">{product.rating.toFixed(1)}</span>
+                <span>({product.reviewCount})</span>
               </div>
               <div className="w-1 h-1 rounded-full bg-border"></div>
               <div className="flex items-center gap-1.5">
                 <Download className="w-4 h-4" />
-                <span className="text-foreground">{PRODUCT.salesCount}</span> Sales
+                <span className="text-foreground">{product.salesCount}</span> Sales
               </div>
             </div>
 
@@ -306,13 +344,13 @@ export default function ProductDetailPage() {
                     </div>
                     <span className="font-bold">Source Code Only</span>
                   </div>
-                  <span className="text-xl font-mono font-bold text-foreground">${PRODUCT.price.toFixed(2)}</span>
+                  <span className="text-xl font-mono font-bold text-foreground">${product.price.toFixed(2)}</span>
                 </div>
                 <p className="text-xs text-muted-foreground pl-6">One-time payment. Download the code and host it yourself.</p>
               </div>
 
               {/* Managed Hosting Option */}
-              {PRODUCT.hasManagedHosting && (
+              {product.hasManagedHosting && (
                 <div 
                   className={`p-4 rounded-xl border-2 cursor-pointer transition-all ${purchaseTier === "managed" ? "border-primary bg-primary/5" : "border-border hover:border-border-hover bg-background"}`}
                   onClick={() => setPurchaseTier("managed")}
@@ -325,7 +363,7 @@ export default function ProductDetailPage() {
                       <span className="font-bold">Managed Setup & Hosting</span>
                     </div>
                   </div>
-                  <p className="text-xs text-muted-foreground pl-6 mb-3">Base price ${PRODUCT.price.toFixed(2)} + recurring hosting fee. Seller handles setup and server maintenance.</p>
+                  <p className="text-xs text-muted-foreground pl-6 mb-3">Base price ${product.price.toFixed(2)} + recurring hosting fee. Seller handles setup and server maintenance.</p>
                   
                   {purchaseTier === "managed" && (
                     <div className="pl-6 pt-3 border-t border-border/50">
@@ -345,7 +383,7 @@ export default function ProductDetailPage() {
                       </div>
                       <div className="flex items-end gap-2">
                         <span className="text-2xl font-mono font-bold text-primary">
-                          ${hostingBilling === "monthly" ? PRODUCT.hostingPriceMonthly?.toFixed(2) : PRODUCT.hostingPriceYearly?.toFixed(2)}
+                          ${hostingBilling === "monthly" ? product.hostingPriceMonthly?.toFixed(2) : product.hostingPriceYearly?.toFixed(2)}
                         </span>
                         <span className="text-sm text-muted-foreground mb-1">/ {hostingBilling === "monthly" ? "month" : "year"}</span>
                       </div>
@@ -374,18 +412,18 @@ export default function ProductDetailPage() {
             </div>
 
             <div className="mt-6 pt-6 border-t border-border">
-              <Link href={`/profile/${PRODUCT.seller.username}`}>
+              <Link href={`/profile/${product.seller.username}`}>
                 <div className="flex items-center gap-3 p-3 rounded-lg hover:bg-secondary/50 transition-colors">
                   <Avatar className="w-12 h-12 border border-border">
-                    <AvatarImage src={PRODUCT.seller.avatar} />
-                    <AvatarFallback>{PRODUCT.seller.username.slice(0, 2)}</AvatarFallback>
+                    <AvatarImage src={product.seller.avatar} />
+                    <AvatarFallback>{product.seller.username.slice(0, 2)}</AvatarFallback>
                   </Avatar>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-semibold text-foreground truncate">{PRODUCT.seller.username}</span>
-                      {PRODUCT.seller.isVerified && <ShieldCheck className="w-4 h-4 text-success shrink-0" />}
+                      <span className="font-semibold text-foreground truncate">{product.seller.username}</span>
+                      {product.seller.isVerified && <ShieldCheck className="w-4 h-4 text-success shrink-0" />}
                     </div>
-                    <div className="text-xs text-muted-foreground mt-0.5">Member since {PRODUCT.seller.memberSince}</div>
+                    <div className="text-xs text-muted-foreground mt-0.5">Member since {product.seller.memberSince}</div>
                   </div>
                   <ExternalLink className="w-4 h-4 text-muted-foreground" />
                 </div>
@@ -395,11 +433,11 @@ export default function ProductDetailPage() {
             <div className="mt-6 space-y-2 text-sm">
               <div className="flex justify-between text-muted-foreground">
                 <span>Version</span>
-                <span className="text-foreground font-mono">{PRODUCT.version}</span>
+                <span className="text-foreground font-mono">{product.version}</span>
               </div>
               <div className="flex justify-between text-muted-foreground">
                 <span>Last Updated</span>
-                <span className="text-foreground">{PRODUCT.lastUpdated}</span>
+                <span className="text-foreground">{product.lastUpdated}</span>
               </div>
             </div>
           </div>

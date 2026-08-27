@@ -28,4 +28,14 @@ public class MarketplaceController {
                 .data(products)
                 .build());
     }
+
+    @GetMapping("/products/{slug}")
+    public ResponseEntity<ApiResponse> getProductBySlug(@org.springframework.web.bind.annotation.PathVariable String slug) {
+        ProductResponse product = marketplaceService.getProductBySlug(slug);
+        return ResponseEntity.ok(ApiResponse.builder()
+                .status(200)
+                .message("Success")
+                .data(product)
+                .build());
+    }
 }
